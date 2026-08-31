@@ -1,20 +1,24 @@
 const express = require('express');
 const cors = require('cors');
 const healthRoutes = require('./routes/health');
+const usersRoutes = require('./routes/users');
+const accountsRoutes = require('./routes/accounts');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use('/api/health', healthRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/accounts', accountsRoutes);
 
-// Basic error handler
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ error: 'Internal Server Error' });
+
+  res.status(err.statusCode || 500).json({
+    error: err.message || 'Internal Server Error'
+  });
 });
 
 module.exports = app;

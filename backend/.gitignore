@@ -3,3 +3,9 @@ node_modules/
 dist/
 npm-debug.log
 .DS_Store
+
+# AI tool configuration
+.agents/
+.claude/
+.cursor/
+.devin/
