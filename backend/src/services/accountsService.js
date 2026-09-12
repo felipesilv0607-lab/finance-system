@@ -6,16 +6,6 @@ async function createAccount({
   type,
   initialBalance
 }) {
-  const existingUser = await prisma.user.findUnique({
-    where: { id: userId }
-  });
-
-  if (!existingUser) {
-    const error = new Error('User not found');
-    error.statusCode = 404;
-    throw error;
-  }
-
   return prisma.account.create({
     data: {
       userId,
@@ -28,21 +18,20 @@ async function createAccount({
       name: true,
       type: true,
       initialBalance: true,
-      userId: true,
       createdAt: true,
       updatedAt: true
     }
   });
 }
 
-async function getAccounts() {
+async function getAccounts(userId) {
   return prisma.account.findMany({
+    where: { userId },
     select: {
       id: true,
       name: true,
       type: true,
       initialBalance: true,
-      userId: true,
       createdAt: true,
       updatedAt: true
     },
@@ -52,15 +41,14 @@ async function getAccounts() {
   });
 }
 
-async function getAccountById(id) {
-  return prisma.account.findUnique({
-    where: { id },
+async function getAccountById(id, userId) {
+  return prisma.account.findFirst({
+    where: { id, userId },
     select: {
       id: true,
       name: true,
       type: true,
       initialBalance: true,
-      userId: true,
       createdAt: true,
       updatedAt: true
     }
@@ -69,14 +57,15 @@ async function getAccountById(id) {
 
 async function updateAccount(
   id,
+  userId,
   {
     name,
     type,
     initialBalance
   }
 ) {
-  const existingAccount = await prisma.account.findUnique({
-    where: { id }
+  const existingAccount = await prisma.account.findFirst({
+    where: { id, userId }
   });
 
   if (!existingAccount) {
@@ -97,16 +86,15 @@ async function updateAccount(
       name: true,
       type: true,
       initialBalance: true,
-      userId: true,
       createdAt: true,
       updatedAt: true
     }
   });
 }
 
-async function deleteAccount(id) {
-  const existingAccount = await prisma.account.findUnique({
-    where: { id }
+async function deleteAccount(id, userId) {
+  const existingAccount = await prisma.account.findFirst({
+    where: { id, userId }
   });
 
   if (!existingAccount) {

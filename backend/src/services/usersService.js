@@ -1,6 +1,6 @@
 const prisma = require('../lib/prisma');
 
-async function createUser({ name, email }) {
+async function createUser({ name, email, passwordHash }) {
   const existingUser = await prisma.user.findUnique({
     where: { email }
   });
@@ -14,7 +14,8 @@ async function createUser({ name, email }) {
   return prisma.user.create({
     data: {
       name,
-      email
+      email,
+      passwordHash
     },
     select: {
       id: true,
@@ -22,6 +23,18 @@ async function createUser({ name, email }) {
       email: true,
       createdAt: true,
       updatedAt: true
+    }
+  });
+}
+
+async function getUserByEmailForAuthentication(email) {
+  return prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      passwordHash: true
     }
   });
 }
@@ -104,6 +117,7 @@ async function getUserById(id) {
 
 module.exports = {
   createUser,
+  getUserByEmailForAuthentication,
   getUsers,
   getUserById,
   updateUser,

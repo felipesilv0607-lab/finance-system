@@ -2,20 +2,30 @@ const usersService = require('../services/usersService');
 
 const {
   validateUserInput,
+  validatePassword,
   normalizeUserInput,
   isValidUserId
 } = require('../utils/userValidation');
+const {
+  hashPassword,
+  comparePassword,
+  createAccessToken
+} = require('../utils/auth');
 
 async function createUser(req, res, next) {
   try {
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
 
     const validation = validateUserInput({ name, email });
+    const passwordValidation = validatePassword(password);
 
-    if (!validation.isValid) {
+    if (!validation.isValid || !passwordValidation.isValid) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: validation.errors
+        details: {
+          ...validation.errors,
+          ...passwordValidation.errors
+        }
       });
     }
 
@@ -24,7 +34,10 @@ async function createUser(req, res, next) {
       email
     });
 
-    const user = await usersService.createUser(normalizedData);
+    const user = await usersService.createUser({
+      ...normalizedData,
+      passwordHash: await hashPassword(password)
+    });
 
     return res.status(201).json(user);
   } catch (error) {
@@ -32,9 +45,41 @@ async function createUser(req, res, next) {
   }
 }
 
+async function loginUser(req, res, next) {
+  try {
+    const { email, password } = req.body;
+
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const user = await usersService.getUserByEmailForAuthentication(
+      email.trim().toLowerCase()
+    );
+    const isPasswordValid = user?.passwordHash
+      ? await comparePassword(password, user.passwordHash)
+      : false;
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    return res.status(200).json({
+      token: createAccessToken(user),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function getUsers(req, res, next) {
   try {
-    const users = await usersService.getUsers();
+    const users = await usersService.getUserById(req.user.id);
 
     return res.status(200).json(users);
   } catch (error) {
@@ -45,6 +90,10 @@ async function getUsers(req, res, next) {
 async function getUserById(req, res, next) {
   try {
     const { id } = req.params;
+
+    if (id !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
 
     if (!isValidUserId(id)) {
       return res.status(400).json({
@@ -69,6 +118,10 @@ async function getUserById(req, res, next) {
 async function updateUser(req, res, next) {
   try {
     const { id } = req.params;
+
+    if (id !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
 
     if (!isValidUserId(id)) {
       return res.status(400).json({
@@ -107,6 +160,10 @@ async function deleteUser(req, res, next) {
   try {
     const { id } = req.params;
 
+    if (id !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     if (!isValidUserId(id)) {
       return res.status(400).json({
         error: 'Invalid user ID'
@@ -123,6 +180,7 @@ async function deleteUser(req, res, next) {
 
 module.exports = {
   createUser,
+  loginUser,
   getUsers,
   getUserById,
   updateUser,

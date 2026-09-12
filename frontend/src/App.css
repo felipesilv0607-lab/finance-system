@@ -660,3 +660,121 @@
     width: 225px;
   }
 }
+
+
+/* ========================================
+   FORMULÁRIO DE CONTAS
+   ======================================== */
+
+.account-form-section {
+  margin-bottom: 32px;
+}
+
+.account-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: end;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-field input::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.account-submit-button {
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.account-submit-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.account-submit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ========================================
+   RESPONSIVIDADE DO FORMULÁRIO
+   ======================================== */
+
+@media (max-width: 800px) {
+  .account-form {
+    grid-template-columns: 1fr;
+  }
+
+  .account-submit-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .account-form-section {
+    margin-bottom: 24px;
+  }
+
+  .account-form {
+    gap: 16px;
+  }
+
+  .form-field input,
+  .form-field select,
+  .account-submit-button {
+    height: 42px;
+  }
+}
+
+
+
+
+
+
+

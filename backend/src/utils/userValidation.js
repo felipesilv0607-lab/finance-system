@@ -27,6 +27,23 @@ function validateUserInput({ name, email }) {
   };
 }
 
+function validatePassword(password) {
+  const errors = {};
+
+  if (typeof password !== 'string') {
+    errors.password = 'Password is required';
+  } else if (password.length < 8) {
+    errors.password = 'Password must be at least 8 characters long';
+  } else if (password.length > 128) {
+    errors.password = 'Password must be at most 128 characters long';
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+}
+
 function normalizeUserInput({ name, email }) {
   return {
     name: name.trim(),
@@ -41,6 +58,7 @@ function isValidUserId(id) {
 }
 module.exports = {
   validateUserInput,
+  validatePassword,
   normalizeUserInput,
   isValidUserId
 };

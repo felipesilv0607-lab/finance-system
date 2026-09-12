@@ -3,24 +3,12 @@ const accountsService = require('../services/accountsService');
 const {
   validateAccountInput,
   normalizeAccountInput,
-  isValidAccountId,
-  isValidUserId
+  isValidAccountId
 } = require('../utils/accountValidation');
 
 async function createAccount(req, res, next) {
   try {
-    const {
-      userId,
-      name,
-      type,
-      initialBalance
-    } = req.body;
-
-    if (!isValidUserId(userId)) {
-      return res.status(400).json({
-        error: 'Invalid user ID'
-      });
-    }
+    const { name, type, initialBalance } = req.body;
 
     const validation = validateAccountInput({
       name,
@@ -42,7 +30,7 @@ async function createAccount(req, res, next) {
     });
 
     const account = await accountsService.createAccount({
-      userId,
+      userId: req.user.id,
       ...normalizedData
     });
 
@@ -54,7 +42,7 @@ async function createAccount(req, res, next) {
 
 async function getAccounts(req, res, next) {
   try {
-    const accounts = await accountsService.getAccounts();
+    const accounts = await accountsService.getAccounts(req.user.id);
 
     return res.status(200).json(accounts);
   } catch (error) {
@@ -72,7 +60,7 @@ async function getAccountById(req, res, next) {
       });
     }
 
-    const account = await accountsService.getAccountById(id);
+    const account = await accountsService.getAccountById(id, req.user.id);
 
     if (!account) {
       return res.status(404).json({
@@ -123,6 +111,7 @@ async function updateAccount(req, res, next) {
 
     const account = await accountsService.updateAccount(
       id,
+      req.user.id,
       normalizedData
     );
 
@@ -142,7 +131,7 @@ async function deleteAccount(req, res, next) {
       });
     }
 
-    await accountsService.deleteAccount(id);
+    await accountsService.deleteAccount(id, req.user.id);
 
     return res.status(204).send();
   } catch (error) {
