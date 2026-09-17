@@ -59,6 +59,7 @@ model Category {
   updatedAt    DateTime        @updatedAt
 
   @@index([userId])
+  @@unique([userId, name, type])
   @@map("categories")
 }
 

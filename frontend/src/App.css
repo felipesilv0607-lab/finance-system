@@ -743,6 +743,85 @@
 }
 
 /* ========================================
+   CATEGORIAS
+   ======================================== */
+
+.category-form-section {
+  margin-bottom: 32px;
+}
+
+.category-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.5fr) auto;
+  gap: 20px;
+  align-items: end;
+}
+
+.category-form-actions,
+.category-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.category-cancel-button,
+.category-actions button {
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.category-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.category-delete-button {
+  color: var(--danger) !important;
+}
+
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.category-row h4 {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.category-type {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.category-type-income {
+  color: var(--success);
+}
+
+.category-type-expense {
+  color: var(--danger);
+}
+
+/* ========================================
    RESPONSIVIDADE DO FORMULÁRIO
    ======================================== */
 
@@ -751,13 +830,25 @@
     grid-template-columns: 1fr;
   }
 
+  .category-form {
+    grid-template-columns: 1fr;
+  }
+
   .account-submit-button {
     width: 100%;
+  }
+
+  .category-form-actions .account-submit-button {
+    width: auto;
   }
 }
 
 @media (max-width: 600px) {
   .account-form-section {
+    margin-bottom: 24px;
+  }
+
+  .category-form-section {
     margin-bottom: 24px;
   }
 
@@ -770,8 +861,12 @@
   .account-submit-button {
     height: 42px;
   }
-}
 
+  .category-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 
 
 

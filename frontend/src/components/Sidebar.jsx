@@ -14,6 +14,7 @@
       <nav className="sidebar-nav">
         <a href="/" onClick={handleNavigation}>Dashboard</a>
         <a href="/accounts" onClick={handleNavigation}>Contas</a>
+        <a href="/categories" onClick={handleNavigation}>Categorias</a>
         <a href="/income" onClick={handleNavigation}>Receitas</a>
         <a href="/expenses" onClick={handleNavigation}>Despesas</a>
       </nav>
