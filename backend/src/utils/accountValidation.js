@@ -1,3 +1,5 @@
+const ACCOUNT_TYPES = ['BANK', 'CASH', 'INVESTMENT', 'OTHER'];
+
 function validateAccountInput({
   name,
   type,
@@ -16,10 +18,11 @@ function validateAccountInput({
 
   // TYPE
   if (typeof type !== 'string' || type.trim().length === 0) {
-    errors.type = 'Type is required';
-  } else if (type.trim().length > 50) {
-    errors.type = 'Type must be at most 50 characters long';
-  }
+   errors.type = 'Type is required';
+} else if (!ACCOUNT_TYPES.includes(type.trim().toUpperCase())) {
+   errors.type = 'Type must be BANK, CASH, INVESTMENT or OTHER';
+   
+}
 
   // INITIAL BALANCE
   if (
@@ -49,7 +52,7 @@ function normalizeAccountInput({
 }) {
   return {
     name: name.trim(),
-    type: type.trim(),
+    type: type.trim().toUpperCase(),
     initialBalance:
       initialBalance === undefined ||
       initialBalance === null ||
@@ -74,6 +77,7 @@ function isValidUserId(id) {
 }
 
 module.exports = {
+  ACCOUNT_TYPES,
   validateAccountInput,
   normalizeAccountInput,
   isValidAccountId,

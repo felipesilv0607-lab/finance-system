@@ -54,7 +54,20 @@ export async function updateAccount(id, accountData) {
   return response.json();
 }
 
+export async function deleteAccount(id) {
+  const response = await fetch(`${API_URL}/accounts/${id}`, {
+    method: 'DELETE',
+    headers: getAuthorizationHeader(),
+  });
 
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+
+    throw new Error(
+      errorData?.error || 'Não foi possível excluir a conta.'
+    );
+  }
+}
 
 
 

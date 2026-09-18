@@ -4,6 +4,7 @@ import {
   getAccounts,
   createAccount,
   updateAccount,
+  deleteAccount,
 } from '../services/accountsService';
 
 function Accounts() {
@@ -14,8 +15,10 @@ function Accounts() {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
-  const [creating, setCreating] = useState(false);
+
   const [editingAccount, setEditingAccount] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deletingAccountId, setDeletingAccountId] = useState(null);
 
   useEffect(() => {
     async function loadAccounts() {
@@ -33,32 +36,99 @@ function Accounts() {
     loadAccounts();
   }, []);
 
-  async function handleCreateAccount(event) {
+  function clearForm() {
+    setName('');
+    setType('');
+    setInitialBalance('');
+    setEditingAccount(null);
+  }
+
+  async function handleSubmitAccount(event) {
     event.preventDefault();
 
     try {
-      setCreating(true);
+      setSaving(true);
       setError('');
 
-      const newAccount = await createAccount({
+      const accountData = {
         name,
         type,
         initialBalance: Number(initialBalance),
-      });
+      };
 
-      setAccounts((currentAccounts) => [
-        ...currentAccounts,
-        newAccount,
-      ]);
+      if (editingAccount) {
+        const updatedAccount = await updateAccount(
+          editingAccount.id,
+          accountData
+        );
 
-      setName('');
-      setType('');
-      setInitialBalance('');
+        setAccounts((currentAccounts) =>
+          currentAccounts.map((account) =>
+            account.id === updatedAccount.id
+              ? updatedAccount
+              : account
+          )
+        );
+      } else {
+        const newAccount = await createAccount(accountData);
+
+        setAccounts((currentAccounts) => [
+          ...currentAccounts,
+          newAccount,
+        ]);
+      }
+
+      clearForm();
     } catch (err) {
       console.error(err);
       setError(err.message);
     } finally {
-      setCreating(false);
+      setSaving(false);
+    }
+  }
+
+  function handleEditAccount(account) {
+    setEditingAccount(account);
+    setName(account.name);
+    setType(account.type);
+    setInitialBalance(String(account.initialBalance));
+    setError('');
+  }
+
+  function handleCancelEdit() {
+    clearForm();
+    setError('');
+  }
+
+  async function handleDeleteAccount(account) {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja excluir a conta "${account.name}"?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingAccountId(account.id);
+      setError('');
+
+      await deleteAccount(account.id);
+
+      setAccounts((currentAccounts) =>
+        currentAccounts.filter(
+          (currentAccount) => currentAccount.id !== account.id
+        )
+      );
+
+      if (editingAccount?.id === account.id) {
+        clearForm();
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
+      setDeletingAccountId(null);
     }
   }
 
@@ -68,7 +138,7 @@ function Accounts() {
       currency: 'BRL',
     });
 
-  const formatAccountType = (type) => {
+  const formatAccountType = (accountType) => {
     const types = {
       BANK: 'Conta bancária',
       CASH: 'Dinheiro',
@@ -76,7 +146,7 @@ function Accounts() {
       OTHER: 'Outra',
     };
 
-    return types[type] || type;
+    return types[accountType] || accountType;
   };
 
   return (
@@ -97,12 +167,16 @@ function Accounts() {
             <div>
               <span>CADASTRO</span>
 
-              <h3>Nova conta</h3>
+              <h3>
+                {editingAccount
+                  ? 'Editar conta'
+                  : 'Nova conta'}
+              </h3>
             </div>
           </div>
 
           <form
-            onSubmit={handleCreateAccount}
+            onSubmit={handleSubmitAccount}
             className="account-form"
           >
             <div className="form-field">
@@ -175,13 +249,32 @@ function Accounts() {
               />
             </div>
 
-            <button
-              type="submit"
-              className="account-submit-button"
-              disabled={creating}
-            >
-              {creating ? 'Criando...' : 'Criar conta'}
-            </button>
+            <div className="account-form-actions">
+              <button
+                type="submit"
+                className="account-submit-button"
+                disabled={saving}
+              >
+                {saving
+                  ? editingAccount
+                    ? 'Salvando...'
+                    : 'Criando...'
+                  : editingAccount
+                    ? 'Salvar alterações'
+                    : 'Criar conta'}
+              </button>
+
+              {editingAccount && (
+                <button
+                  type="button"
+                  className="account-cancel-button"
+                  onClick={handleCancelEdit}
+                  disabled={saving}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
           </form>
         </section>
 
@@ -197,7 +290,7 @@ function Accounts() {
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && (
           <div className="accounts-grid">
             {accounts.map((account) => (
               <article
@@ -219,11 +312,41 @@ function Accounts() {
                 </div>
 
                 <div className="account-balance">
-                  <span>Saldo</span>
+                  <span>Saldo inicial</span>
 
                   <strong>
                     {formatCurrency(account.initialBalance)}
                   </strong>
+                </div>
+
+                <div className="account-card-actions">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleEditAccount(account)
+                    }
+                    disabled={
+                      saving ||
+                      deletingAccountId === account.id
+                    }
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDeleteAccount(account)
+                    }
+                    disabled={
+                      saving ||
+                      deletingAccountId === account.id
+                    }
+                  >
+                    {deletingAccountId === account.id
+                      ? 'Excluindo...'
+                      : 'Excluir'}
+                  </button>
                 </div>
               </article>
             ))}
@@ -234,7 +357,8 @@ function Accounts() {
                   <h4>Nenhuma conta cadastrada</h4>
 
                   <p>
-                    Quando você adicionar uma conta, ela aparecerá aqui.
+                    Quando você adicionar uma conta,
+                    ela aparecerá aqui.
                   </p>
                 </div>
               </div>

@@ -103,6 +103,18 @@ async function deleteAccount(id, userId) {
     throw error;
   }
 
+  const transactionCount = await prisma.transaction.count({
+    where: { accountId: id }
+  });
+
+  if (transactionCount > 0) {
+    const error = new Error(
+      'Cannot delete an account that has transactions'
+    );
+    error.statusCode = 409;
+    throw error;
+  }
+
   await prisma.account.delete({
     where: { id }
   });
