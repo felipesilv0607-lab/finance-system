@@ -2,10 +2,12 @@
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
 import Categories from './pages/Categories';
+import Transactions from './pages/Transactions';
 import './App.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
+import Income from './pages/Income';
 
 function Placeholder({ title }) {
   return (
@@ -29,10 +31,16 @@ function App() {
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />
         <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
-        <Route
-          path="/income"
-          element={<Placeholder title="Receitas" />}
-        />
+        <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+       <Route
+           path="/income"
+            element={
+          <ProtectedRoute>
+          <Income />
+        </ProtectedRoute>
+          }
+            />
+        
         <Route
           path="/expenses"
           element={<Placeholder title="Despesas" />}

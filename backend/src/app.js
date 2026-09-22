@@ -4,6 +4,7 @@ const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
 const accountsRoutes = require('./routes/accounts');
 const categoriesRoutes = require('./routes/categories');
+const transactionsRoutes = require('./routes/transactions');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/health', healthRoutes);
+app.use('/api/transactions', transactionsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/categories', categoriesRoutes);

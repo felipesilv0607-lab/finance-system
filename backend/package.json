@@ -5,8 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "node --test tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js",
+    "test": "node --test tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js",
     "postinstall": "prisma skills sync || exit 0"
   },
   "keywords": [],
