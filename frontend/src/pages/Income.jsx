@@ -8,6 +8,10 @@ import {
 } from '../services/transactionsService';
 import { getAccounts } from '../services/accountsService';
 import { getCategories } from '../services/categoriesService';
+import {
+  formatAmountInput,
+  formatAmountOnBlur,
+} from '../utils/amount';
 
 function getToday() {
   return new Date().toISOString().split('T')[0];
@@ -144,7 +148,7 @@ function Income() {
 
     setForm({
       description: transaction.description,
-      amount: transaction.amount,
+      amount: formatAmountInput(String(transaction.amount)),
       date: transaction.date?.slice(0, 10),
       accountId: transaction.accountId,
       categoryId: transaction.categoryId
@@ -184,8 +188,8 @@ function Income() {
   }
 
   return (
-  <AppLayout title="Receitas" section="FINANÇAS">
-    <div className="page-container">
+    <AppLayout title="Receitas" section="FINANÇAS">
+      <div className="page-container">
         <div>
           <h2>Receitas</h2>
           <p>Gerencie suas entradas de dinheiro.</p>
@@ -217,6 +221,7 @@ function Income() {
           <div className="form-grid">
             <div className="form-group">
               <label htmlFor="description">Descrição</label>
+
               <input
                 id="description"
                 name="description"
@@ -232,21 +237,37 @@ function Income() {
 
             <div className="form-group">
               <label htmlFor="amount">Valor</label>
+
               <input
                 id="amount"
                 name="amount"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={form.amount}
-                onChange={handleChange}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: formatAmountInput(
+                      event.target.value
+                    )
+                  }))
+                }
+                onBlur={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: formatAmountOnBlur(
+                      event.target.value
+                    )
+                  }))
+                }
                 placeholder="0,00"
-                min="0.01"
-                step="0.01"
                 required
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="date">Data</label>
+
               <input
                 id="date"
                 name="date"
@@ -259,6 +280,7 @@ function Income() {
 
             <div className="form-group">
               <label htmlFor="accountId">Conta</label>
+
               <select
                 id="accountId"
                 name="accountId"
@@ -266,10 +288,15 @@ function Income() {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecione uma conta</option>
+                <option value="">
+                  Selecione uma conta
+                </option>
 
                 {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
+                  <option
+                    key={account.id}
+                    value={account.id}
+                  >
                     {account.name}
                   </option>
                 ))}
@@ -278,6 +305,7 @@ function Income() {
 
             <div className="form-group">
               <label htmlFor="categoryId">Categoria</label>
+
               <select
                 id="categoryId"
                 name="categoryId"
@@ -285,10 +313,15 @@ function Income() {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecione uma categoria</option>
+                <option value="">
+                  Selecione uma categoria
+                </option>
 
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <option
+                    key={category.id}
+                    value={category.id}
+                  >
                     {category.name}
                   </option>
                 ))}
@@ -338,6 +371,7 @@ function Income() {
         <div className="card-header">
           <div>
             <h3>Histórico de receitas</h3>
+
             <p>
               {transactions.length}{' '}
               {transactions.length === 1
@@ -382,22 +416,31 @@ function Income() {
                   return (
                     <tr key={transaction.id}>
                       <td>{formatDate(transaction.date)}</td>
+
                       <td>{transaction.description}</td>
+
                       <td>
-                        {category?.name || 'Categoria não encontrada'}
+                        {category?.name ||
+                          'Categoria não encontrada'}
                       </td>
+
                       <td>
-                        {account?.name || 'Conta não encontrada'}
+                        {account?.name ||
+                          'Conta não encontrada'}
                       </td>
+
                       <td className="transaction-type-income">
                         {formatCurrency(transaction.amount)}
                       </td>
+
                       <td>
                         <div className="table-actions">
                           <button
                             type="button"
                             className="btn-secondary"
-                            onClick={() => handleEdit(transaction)}
+                            onClick={() =>
+                              handleEdit(transaction)
+                            }
                           >
                             Editar
                           </button>
@@ -405,7 +448,9 @@ function Income() {
                           <button
                             type="button"
                             className="btn-danger"
-                            onClick={() => handleDelete(transaction.id)}
+                            onClick={() =>
+                              handleDelete(transaction.id)
+                            }
                           >
                             Excluir
                           </button>
@@ -419,7 +464,7 @@ function Income() {
           </div>
         )}
       </div>
-     </AppLayout>
+    </AppLayout>
   );
 }
 

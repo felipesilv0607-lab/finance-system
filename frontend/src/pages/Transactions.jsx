@@ -8,6 +8,10 @@ import {
 } from '../services/transactionsService';
 import { getAccounts } from '../services/accountsService';
 import { getCategories } from '../services/categoriesService';
+import {
+  formatAmountInput,
+  formatAmountOnBlur,
+} from '../utils/amount';
 
 const initialForm = {
   description: '',
@@ -121,7 +125,7 @@ function Transactions() {
 
     setForm({
       description: transaction.description,
-      amount: transaction.amount,
+      amount: formatAmountInput(String(transaction.amount)),
       type: transaction.type,
       date: new Date(transaction.date)
         .toISOString()
@@ -219,307 +223,334 @@ function Transactions() {
 
     return category?.name || 'Categoria não encontrada';
   }
-return (
-  <AppLayout title="Transações" section="FINANÇAS">
-    <div className="page-container">
 
-      <div className="page-header">
-        <div>
-          <h1>Transações</h1>
-          <p>Gerencie suas receitas e despesas.</p>
-        </div>
-      </div>
+  return (
+    <AppLayout title="Transações" section="FINANÇAS">
+      <div className="page-container">
 
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          {success}
-        </div>
-      )}
-
-      <section className="card">
-        <div className="card-header">
-          <h2>
-            {editingId
-              ? 'Editar transação'
-              : 'Nova transação'}
-          </h2>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="description">
-                Descrição
-              </label>
-
-              <input
-                id="description"
-                name="description"
-                type="text"
-                value={form.description}
-                onChange={handleChange}
-                placeholder="Ex.: Salário"
-                maxLength={200}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="amount">
-                Valor
-              </label>
-
-              <input
-                id="amount"
-                name="amount"
-                type="number"
-                value={form.amount}
-                onChange={handleChange}
-                placeholder="0,00"
-                min="0.01"
-                step="0.01"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="type">
-                Tipo
-              </label>
-
-              <select
-                id="type"
-                name="type"
-                value={form.type}
-                onChange={handleTypeChange}
-                required
-              >
-                <option value="EXPENSE">
-                  Despesa
-                </option>
-                <option value="INCOME">
-                  Receita
-                </option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="date">
-                Data
-              </label>
-
-              <input
-                id="date"
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="accountId">
-                Conta
-              </label>
-
-              <select
-                id="accountId"
-                name="accountId"
-                value={form.accountId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">
-                  Selecione uma conta
-                </option>
-
-                {accounts.map((account) => (
-                  <option
-                    key={account.id}
-                    value={account.id}
-                  >
-                    {account.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="categoryId">
-                Categoria
-              </label>
-
-              <select
-                id="categoryId"
-                name="categoryId"
-                value={form.categoryId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">
-                  Selecione uma categoria
-                </option>
-
-                {filteredCategories.map((category) => (
-                  <option
-                    key={category.id}
-                    value={category.id}
-                  >
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-primary"
-            >
-              {saving
-                ? 'Salvando...'
-                : editingId
-                  ? 'Atualizar transação'
-                  : 'Adicionar transação'}
-            </button>
-
-            {editingId && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="btn-secondary"
-              >
-                Cancelar
-              </button>
-            )}
-          </div>
-        </form>
-      </section>
-
-      <section className="card">
-        <div className="card-header transactions-list-header">
+        <div className="page-header">
           <div>
-            <h2>Histórico</h2>
-            <p>
-              {transactions.length}{' '}
-              {transactions.length === 1
-                ? 'transação'
-                : 'transações'}
-            </p>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="filterType">
-              Filtrar
-            </label>
-
-            <select
-              id="filterType"
-              value={filterType}
-              onChange={(event) =>
-                setFilterType(event.target.value)
-              }
-            >
-              <option value="">Todas</option>
-              <option value="INCOME">Receitas</option>
-              <option value="EXPENSE">Despesas</option>
-            </select>
+            <h1>Transações</h1>
+            <p>Gerencie suas receitas e despesas.</p>
           </div>
         </div>
 
-        {loading ? (
-          <p>Carregando transações...</p>
-        ) : transactions.length === 0 ? (
-          <div className="empty-state">
-            <p>Nenhuma transação encontrada.</p>
-          </div>
-        ) : (
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Descrição</th>
-                  <th>Categoria</th>
-                  <th>Conta</th>
-                  <th>Tipo</th>
-                  <th>Valor</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {transactions.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td>
-                      {formatDate(transaction.date)}
-                    </td>
-
-                    <td>{transaction.description}</td>
-
-                    <td>
-                      {getCategoryName(
-                        transaction.categoryId
-                      )}
-                    </td>
-
-                    <td>
-                      {getAccountName(
-                        transaction.accountId
-                      )}
-                    </td>
-
-                    <td>
-                      {transaction.type === 'INCOME'
-                        ? 'Receita'
-                        : 'Despesa'}
-                    </td>
-
-                    <td>
-                      {formatCurrency(transaction.amount)}
-                    </td>
-
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleEdit(transaction)
-                          }
-                          className="btn-secondary"
-                        >
-                          Editar
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(transaction.id)
-                          }
-                          className="btn-danger"
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {error && (
+          <div className="alert alert-error">
+            {error}
           </div>
         )}
-      </section>
-    </div>
-     </AppLayout>
+
+        {success && (
+          <div className="alert alert-success">
+            {success}
+          </div>
+        )}
+
+        <section className="card">
+          <div className="card-header">
+            <h2>
+              {editingId
+                ? 'Editar transação'
+                : 'Nova transação'}
+            </h2>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+
+              <div className="form-group">
+                <label htmlFor="description">
+                  Descrição
+                </label>
+
+                <input
+                  id="description"
+                  name="description"
+                  type="text"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Ex.: Salário"
+                  maxLength={200}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="amount">
+                  Valor
+                </label>
+
+                <input
+                  id="amount"
+                  name="amount"
+                  type="text"
+                  inputMode="decimal"
+                  value={form.amount}
+                  onChange={(event) =>
+                    setForm((currentForm) => ({
+                      ...currentForm,
+                      amount: formatAmountInput(
+                        event.target.value
+                      )
+                    }))
+                  }
+                  onBlur={(event) =>
+                    setForm((currentForm) => ({
+                      ...currentForm,
+                      amount: formatAmountOnBlur(
+                        event.target.value
+                      )
+                    }))
+                  }
+                  placeholder="0,00"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="type">
+                  Tipo
+                </label>
+
+                <select
+                  id="type"
+                  name="type"
+                  value={form.type}
+                  onChange={handleTypeChange}
+                  required
+                >
+                  <option value="EXPENSE">
+                    Despesa
+                  </option>
+
+                  <option value="INCOME">
+                    Receita
+                  </option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="date">
+                  Data
+                </label>
+
+                <input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={form.date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="accountId">
+                  Conta
+                </label>
+
+                <select
+                  id="accountId"
+                  name="accountId"
+                  value={form.accountId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">
+                    Selecione uma conta
+                  </option>
+
+                  {accounts.map((account) => (
+                    <option
+                      key={account.id}
+                      value={account.id}
+                    >
+                      {account.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="categoryId">
+                  Categoria
+                </label>
+
+                <select
+                  id="categoryId"
+                  name="categoryId"
+                  value={form.categoryId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">
+                    Selecione uma categoria
+                  </option>
+
+                  {filteredCategories.map((category) => (
+                    <option
+                      key={category.id}
+                      value={category.id}
+                    >
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn-primary"
+              >
+                {saving
+                  ? 'Salvando...'
+                  : editingId
+                    ? 'Atualizar transação'
+                    : 'Adicionar transação'}
+              </button>
+
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="btn-secondary"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
+
+        <section className="card">
+          <div className="card-header transactions-list-header">
+            <div>
+              <h2>Histórico</h2>
+
+              <p>
+                {transactions.length}{' '}
+                {transactions.length === 1
+                  ? 'transação'
+                  : 'transações'}
+              </p>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="filterType">
+                Filtrar
+              </label>
+
+              <select
+                id="filterType"
+                value={filterType}
+                onChange={(event) =>
+                  setFilterType(event.target.value)
+                }
+              >
+                <option value="">Todas</option>
+                <option value="INCOME">
+                  Receitas
+                </option>
+                <option value="EXPENSE">
+                  Despesas
+                </option>
+              </select>
+            </div>
+          </div>
+
+          {loading ? (
+            <p>Carregando transações...</p>
+          ) : transactions.length === 0 ? (
+            <div className="empty-state">
+              <p>Nenhuma transação encontrada.</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Conta</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {transactions.map((transaction) => (
+                    <tr key={transaction.id}>
+                      <td>
+                        {formatDate(transaction.date)}
+                      </td>
+
+                      <td>
+                        {transaction.description}
+                      </td>
+
+                      <td>
+                        {getCategoryName(
+                          transaction.categoryId
+                        )}
+                      </td>
+
+                      <td>
+                        {getAccountName(
+                          transaction.accountId
+                        )}
+                      </td>
+
+                      <td>
+                        {transaction.type === 'INCOME'
+                          ? 'Receita'
+                          : 'Despesa'}
+                      </td>
+
+                      <td>
+                        {formatCurrency(
+                          transaction.amount
+                        )}
+                      </td>
+
+                      <td>
+                        <div className="table-actions">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEdit(transaction)
+                            }
+                            className="btn-secondary"
+                          >
+                            Editar
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(transaction.id)
+                            }
+                            className="btn-danger"
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </AppLayout>
   );
 }
 

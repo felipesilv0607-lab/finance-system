@@ -8,6 +8,10 @@ import {
 } from '../services/transactionsService';
 import { getAccounts } from '../services/accountsService';
 import { getCategories } from '../services/categoriesService';
+import {
+  formatAmountInput,
+  formatAmountOnBlur,
+} from '../utils/amount';
 
 function getToday() {
   return new Date().toISOString().split('T')[0];
@@ -144,7 +148,7 @@ function Expenses() {
 
     setForm({
       description: transaction.description,
-      amount: transaction.amount,
+      amount: formatAmountInput(String(transaction.amount)),
       date: transaction.date?.slice(0, 10),
       accountId: transaction.accountId,
       categoryId: transaction.categoryId
@@ -183,9 +187,9 @@ function Expenses() {
     }
   }
 
- return (
-  <AppLayout title="Despesas" section="FINANÇAS">
-    <div className="page-container">
+  return (
+    <AppLayout title="Despesas" section="FINANÇAS">
+      <div className="page-container">
         <div>
           <h2>Despesas</h2>
           <p>Gerencie seus gastos e saídas de dinheiro.</p>
@@ -216,7 +220,10 @@ function Expenses() {
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor="description">Descrição</label>
+              <label htmlFor="description">
+                Descrição
+              </label>
+
               <input
                 id="description"
                 name="description"
@@ -231,22 +238,42 @@ function Expenses() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="amount">Valor</label>
+              <label htmlFor="amount">
+                Valor
+              </label>
+
               <input
                 id="amount"
                 name="amount"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={form.amount}
-                onChange={handleChange}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: formatAmountInput(
+                      event.target.value
+                    )
+                  }))
+                }
+                onBlur={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: formatAmountOnBlur(
+                      event.target.value
+                    )
+                  }))
+                }
                 placeholder="0,00"
-                min="0.01"
-                step="0.01"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="date">Data</label>
+              <label htmlFor="date">
+                Data
+              </label>
+
               <input
                 id="date"
                 name="date"
@@ -258,7 +285,10 @@ function Expenses() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="accountId">Conta</label>
+              <label htmlFor="accountId">
+                Conta
+              </label>
+
               <select
                 id="accountId"
                 name="accountId"
@@ -266,10 +296,15 @@ function Expenses() {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecione uma conta</option>
+                <option value="">
+                  Selecione uma conta
+                </option>
 
                 {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
+                  <option
+                    key={account.id}
+                    value={account.id}
+                  >
                     {account.name}
                   </option>
                 ))}
@@ -277,7 +312,10 @@ function Expenses() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="categoryId">Categoria</label>
+              <label htmlFor="categoryId">
+                Categoria
+              </label>
+
               <select
                 id="categoryId"
                 name="categoryId"
@@ -285,10 +323,15 @@ function Expenses() {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecione uma categoria</option>
+                <option value="">
+                  Selecione uma categoria
+                </option>
 
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <option
+                    key={category.id}
+                    value={category.id}
+                  >
                     {category.name}
                   </option>
                 ))}
@@ -327,7 +370,9 @@ function Expenses() {
         <div className="card-header">
           <div>
             <h3>Resumo</h3>
-            <p>Total de despesas: {transactions.length}</p>
+            <p>
+              Total de despesas: {transactions.length}
+            </p>
           </div>
 
           <strong>{formatCurrency(totalExpenses)}</strong>
@@ -338,6 +383,7 @@ function Expenses() {
         <div className="card-header">
           <div>
             <h3>Histórico de despesas</h3>
+
             <p>
               {transactions.length}{' '}
               {transactions.length === 1
@@ -372,25 +418,33 @@ function Expenses() {
               <tbody>
                 {transactions.map((transaction) => {
                   const category = categories.find(
-                    (item) => item.id === transaction.categoryId
+                    (item) =>
+                      item.id === transaction.categoryId
                   );
 
                   const account = accounts.find(
-                    (item) => item.id === transaction.accountId
+                    (item) =>
+                      item.id === transaction.accountId
                   );
 
                   return (
                     <tr key={transaction.id}>
-                      <td>{formatDate(transaction.date)}</td>
-
-                      <td>{transaction.description}</td>
-
                       <td>
-                        {category?.name || 'Categoria não encontrada'}
+                        {formatDate(transaction.date)}
                       </td>
 
                       <td>
-                        {account?.name || 'Conta não encontrada'}
+                        {transaction.description}
+                      </td>
+
+                      <td>
+                        {category?.name ||
+                          'Categoria não encontrada'}
+                      </td>
+
+                      <td>
+                        {account?.name ||
+                          'Conta não encontrada'}
                       </td>
 
                       <td className="transaction-type-expense">
@@ -402,7 +456,9 @@ function Expenses() {
                           <button
                             type="button"
                             className="btn-secondary"
-                            onClick={() => handleEdit(transaction)}
+                            onClick={() =>
+                              handleEdit(transaction)
+                            }
                           >
                             Editar
                           </button>
@@ -410,7 +466,9 @@ function Expenses() {
                           <button
                             type="button"
                             className="btn-danger"
-                            onClick={() => handleDelete(transaction.id)}
+                            onClick={() =>
+                              handleDelete(transaction.id)
+                            }
                           >
                             Excluir
                           </button>
@@ -424,7 +482,7 @@ function Expenses() {
           </div>
         )}
       </div>
-     </AppLayout>
+    </AppLayout>
   );
 }
 

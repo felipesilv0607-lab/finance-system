@@ -6,6 +6,10 @@ import {
   updateAccount,
   deleteAccount,
 } from '../services/accountsService';
+import {
+  formatAmountInput,
+  formatAmountOnBlur,
+} from '../utils/amount';
 
 function Accounts() {
   const [accounts, setAccounts] = useState([]);
@@ -91,7 +95,9 @@ function Accounts() {
     setEditingAccount(account);
     setName(account.name);
     setType(account.type);
-    setInitialBalance(String(account.initialBalance));
+    setInitialBalance(
+      formatAmountInput(String(account.initialBalance))
+    );
     setError('');
   }
 
@@ -238,13 +244,20 @@ function Accounts() {
 
               <input
                 id="account-balance"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={initialBalance}
                 onChange={(event) =>
-                  setInitialBalance(event.target.value)
+                  setInitialBalance(
+                    formatAmountInput(event.target.value)
+                  )
+                }
+                onBlur={(event) =>
+                  setInitialBalance(
+                    formatAmountOnBlur(event.target.value)
+                  )
                 }
                 placeholder="0,00"
-                step="0.01"
                 required
               />
             </div>
