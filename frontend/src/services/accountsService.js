@@ -1,78 +1,17 @@
-﻿const API_URL = 'http://localhost:3000/api';
+﻿import { del, get, post, put } from './api';
 
 export async function getAccounts() {
-  const response = await fetch(`${API_URL}/accounts`, {
-    headers: getAuthorizationHeader(),
-  });
-
-  if (!response.ok) {
-    throw new Error('Não foi possível carregar as contas.');
-  }
-
-  return response.json();
+  return get('/accounts');
 }
 
 export async function createAccount(accountData) {
-  const response = await fetch(`${API_URL}/accounts`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthorizationHeader(),
-    },
-    body: JSON.stringify(accountData),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-
-    throw new Error(
-      errorData?.error || 'Não foi possível criar a conta.'
-    );
-  }
-
-  return response.json();
+  return post('/accounts', accountData);
 }
 
 export async function updateAccount(id, accountData) {
-  const response = await fetch(`${API_URL}/accounts/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthorizationHeader(),
-    },
-    body: JSON.stringify(accountData),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-
-    throw new Error(
-      errorData?.error || 'Não foi possível atualizar a conta.'
-    );
-  }
-
-  return response.json();
+  return put(`/accounts/${id}`, accountData);
 }
 
 export async function deleteAccount(id) {
-  const response = await fetch(`${API_URL}/accounts/${id}`, {
-    method: 'DELETE',
-    headers: getAuthorizationHeader(),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-
-    throw new Error(
-      errorData?.error || 'Não foi possível excluir a conta.'
-    );
-  }
+  return del(`/accounts/${id}`);
 }
-
-
-
-
-
-
-
-import { getAuthorizationHeader } from './authService';

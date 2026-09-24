@@ -1,83 +1,29 @@
-import { getAuthorizationHeader } from './authService';
+import { del, get, post, put } from './api';
 
-const API_URL = 'http://localhost:3000/api/transactions';
-
-async function handleResponse(response) {
-  if (response.status === 204) {
-    return null;
-  }
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    const error = new Error(data.error || 'Request failed');
-    error.status = response.status;
-    error.details = data.details;
-    throw error;
-  }
-
-  return data;
-}
+const API_PATH = '/transactions';
 
 async function createTransaction(transactionData) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthorizationHeader()
-    },
-    body: JSON.stringify(transactionData)
-  });
-
-  return handleResponse(response);
+  return post(API_PATH, transactionData);
 }
 
 async function getTransactions(type) {
-  const url = type
-    ? `${API_URL}?type=${encodeURIComponent(type)}`
-    : API_URL;
+  const params = type
+    ? `?type=${encodeURIComponent(type)}`
+    : '';
 
-  const response = await fetch(url, {
-    headers: {
-      ...getAuthorizationHeader()
-    }
-  });
-
-  return handleResponse(response);
+  return get(`${API_PATH}${params}`);
 }
 
 async function getTransactionById(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
-    headers: {
-      ...getAuthorizationHeader()
-    }
-  });
-
-  return handleResponse(response);
+  return get(`${API_PATH}/${id}`);
 }
 
 async function updateTransaction(id, transactionData) {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthorizationHeader()
-    },
-    body: JSON.stringify(transactionData)
-  });
-
-  return handleResponse(response);
+  return put(`${API_PATH}/${id}`, transactionData);
 }
 
 async function deleteTransaction(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: {
-      ...getAuthorizationHeader()
-    }
-  });
-
-  return handleResponse(response);
+  return del(`${API_PATH}/${id}`);
 }
 
 export {

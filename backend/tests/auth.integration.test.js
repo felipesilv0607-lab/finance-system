@@ -153,10 +153,15 @@ test('authentication and account authorization flow', async () => {
     assert.equal(ownerCanStillRead.status, 200);
 
     const expiredToken = jwt.sign(
-      { sub: registrationA.body.id },
-      process.env.JWT_SECRET,
-      { algorithm: 'HS256', expiresIn: '-1s' }
-    );
+  { sub: registrationA.body.id },
+  process.env.JWT_SECRET,
+  {
+    algorithm: 'HS256',
+    expiresIn: '-1s',
+    issuer: process.env.JWT_ISSUER || 'finance-system',
+    audience: process.env.JWT_AUDIENCE || 'finance-system-api'
+  }
+   );
     const expiredAccess = await request('/accounts', { token: expiredToken });
     assert.equal(expiredAccess.status, 401);
 

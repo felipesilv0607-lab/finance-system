@@ -8,19 +8,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import Income from './pages/Income';
+import Expenses from './pages/Expenses';
 
-function Placeholder({ title }) {
-  return (
-    <div className="app-layout">
-      <main className="main-content">
-        <section className="dashboard">
-          <h2>{title}</h2>
-          <p>Esta página será desenvolvida em breve.</p>
-        </section>
-      </main>
-    </div>
-  );
-}
 
 function App() {
   return (
@@ -43,7 +32,11 @@ function App() {
         
         <Route
           path="/expenses"
-          element={<Placeholder title="Despesas" />}
+          element={
+            <ProtectedRoute>
+              <Expenses />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </BrowserRouter>

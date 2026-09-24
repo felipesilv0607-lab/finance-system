@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import AppLayout from '../components/AppLayout';
 import {
   createTransaction,
   getTransactions,
@@ -218,9 +219,10 @@ function Transactions() {
 
     return category?.name || 'Categoria não encontrada';
   }
-
-  return (
+return (
+  <AppLayout title="Transações" section="FINANÇAS">
     <div className="page-container">
+
       <div className="page-header">
         <div>
           <h1>Transações</h1>
@@ -517,6 +519,7 @@ function Transactions() {
         )}
       </section>
     </div>
+     </AppLayout>
   );
 }
 

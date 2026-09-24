@@ -26,7 +26,7 @@ function formatDate(date) {
   return new Date(`${datePart}T00:00:00`).toLocaleDateString('pt-BR');
 }
 
-function Income() {
+function Expenses() {
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -53,7 +53,7 @@ function Income() {
 
       const [transactionsData, accountsData, categoriesData] =
         await Promise.all([
-          getTransactions('INCOME'),
+          getTransactions('EXPENSE'),
           getAccounts(),
           getCategories()
         ]);
@@ -63,11 +63,11 @@ function Income() {
 
       setCategories(
         (categoriesData || []).filter(
-          (category) => category.type === 'INCOME'
+          (category) => category.type === 'EXPENSE'
         )
       );
     } catch (err) {
-      setError(err.message || 'Não foi possível carregar as receitas.');
+      setError(err.message || 'Não foi possível carregar as despesas.');
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ function Income() {
     loadData();
   }, []);
 
-  const totalIncome = useMemo(() => {
+  const totalExpenses = useMemo(() => {
     return transactions.reduce(
       (total, transaction) => total + Number(transaction.amount),
       0
@@ -116,7 +116,7 @@ function Income() {
       const transactionData = {
         description: form.description,
         amount: Number(form.amount),
-        type: 'INCOME',
+        type: 'EXPENSE',
         date: form.date,
         accountId: form.accountId,
         categoryId: form.categoryId
@@ -124,16 +124,16 @@ function Income() {
 
       if (editingId) {
         await updateTransaction(editingId, transactionData);
-        setSuccess('Receita atualizada com sucesso.');
+        setSuccess('Despesa atualizada com sucesso.');
       } else {
         await createTransaction(transactionData);
-        setSuccess('Receita criada com sucesso.');
+        setSuccess('Despesa criada com sucesso.');
       }
 
       resetForm();
       await loadData();
     } catch (err) {
-      setError(err.message || 'Não foi possível salvar a receita.');
+      setError(err.message || 'Não foi possível salvar a despesa.');
     } finally {
       setSaving(false);
     }
@@ -161,7 +161,7 @@ function Income() {
 
   async function handleDelete(id) {
     const confirmed = window.confirm(
-      'Tem certeza que deseja excluir esta receita?'
+      'Tem certeza que deseja excluir esta despesa?'
     );
 
     if (!confirmed) return;
@@ -176,19 +176,19 @@ function Income() {
         resetForm();
       }
 
-      setSuccess('Receita excluída com sucesso.');
+      setSuccess('Despesa excluída com sucesso.');
       await loadData();
     } catch (err) {
-      setError(err.message || 'Não foi possível excluir a receita.');
+      setError(err.message || 'Não foi possível excluir a despesa.');
     }
   }
 
-  return (
-  <AppLayout title="Receitas" section="FINANÇAS">
+ return (
+  <AppLayout title="Despesas" section="FINANÇAS">
     <div className="page-container">
         <div>
-          <h2>Receitas</h2>
-          <p>Gerencie suas entradas de dinheiro.</p>
+          <h2>Despesas</h2>
+          <p>Gerencie seus gastos e saídas de dinheiro.</p>
         </div>
       </div>
 
@@ -208,7 +208,7 @@ function Income() {
         <div className="card-header">
           <div>
             <h3>
-              {editingId ? 'Editar receita' : 'Nova receita'}
+              {editingId ? 'Editar despesa' : 'Nova despesa'}
             </h3>
           </div>
         </div>
@@ -223,7 +223,7 @@ function Income() {
                 type="text"
                 value={form.description}
                 onChange={handleChange}
-                placeholder="Ex.: Salário"
+                placeholder="Ex.: Supermercado"
                 minLength={2}
                 maxLength={200}
                 required
@@ -306,7 +306,7 @@ function Income() {
                 ? 'Salvando...'
                 : editingId
                   ? 'Salvar alterações'
-                  : 'Adicionar receita'}
+                  : 'Adicionar despesa'}
             </button>
 
             {editingId && (
@@ -327,33 +327,33 @@ function Income() {
         <div className="card-header">
           <div>
             <h3>Resumo</h3>
-            <p>Total de receitas: {transactions.length}</p>
+            <p>Total de despesas: {transactions.length}</p>
           </div>
 
-          <strong>{formatCurrency(totalIncome)}</strong>
+          <strong>{formatCurrency(totalExpenses)}</strong>
         </div>
       </div>
 
       <div className="card">
         <div className="card-header">
           <div>
-            <h3>Histórico de receitas</h3>
+            <h3>Histórico de despesas</h3>
             <p>
               {transactions.length}{' '}
               {transactions.length === 1
-                ? 'receita'
-                : 'receitas'}
+                ? 'despesa'
+                : 'despesas'}
             </p>
           </div>
         </div>
 
         {loading ? (
           <div className="empty-state">
-            Carregando receitas...
+            Carregando despesas...
           </div>
         ) : transactions.length === 0 ? (
           <div className="empty-state">
-            Nenhuma receita cadastrada.
+            Nenhuma despesa cadastrada.
           </div>
         ) : (
           <div className="table-container">
@@ -382,16 +382,21 @@ function Income() {
                   return (
                     <tr key={transaction.id}>
                       <td>{formatDate(transaction.date)}</td>
+
                       <td>{transaction.description}</td>
+
                       <td>
                         {category?.name || 'Categoria não encontrada'}
                       </td>
+
                       <td>
                         {account?.name || 'Conta não encontrada'}
                       </td>
-                      <td className="transaction-type-income">
+
+                      <td className="transaction-type-expense">
                         {formatCurrency(transaction.amount)}
                       </td>
+
                       <td>
                         <div className="table-actions">
                           <button
@@ -423,4 +428,4 @@ function Income() {
   );
 }
 
-export default Income;
+export default Expenses;

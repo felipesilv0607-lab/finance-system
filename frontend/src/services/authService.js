@@ -18,6 +18,28 @@ function saveSession(session) {
   localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
+function isTokenExpired(token) {
+  try {
+    const parts = token.split('.');
+
+    if (parts.length !== 3) {
+      return true;
+    }
+
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+    );
+
+    if (typeof payload.exp !== 'number') {
+      return true;
+    }
+
+    return payload.exp <= Math.floor(Date.now() / 1000);
+  } catch {
+    return true;
+  }
+}
+
 async function parseResponse(response, fallbackMessage) {
   const data = await response.json().catch(() => null);
 
@@ -31,8 +53,10 @@ async function parseResponse(response, fallbackMessage) {
 export async function registerUser(userData) {
   const response = await fetch(`${API_URL}/users`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userData)
   });
 
   return parseResponse(response, 'Não foi possível criar a conta.');
@@ -41,27 +65,54 @@ export async function registerUser(userData) {
 export async function loginUser(credentials) {
   const response = await fetch(`${API_URL}/users/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(credentials)
   });
 
-  const session = await parseResponse(response, 'Não foi possível entrar.');
+  const session = await parseResponse(
+    response,
+    'Não foi possível entrar.'
+  );
+
   saveSession(session);
+
   return session;
 }
 
 export function getAuthorizationHeader() {
   const token = readSession()?.token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+
+  if (!token || isTokenExpired(token)) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${token}`
+  };
 }
 
 export function isAuthenticated() {
-  return Boolean(readSession()?.token);
+  const token = readSession()?.token;
+
+  if (!token) {
+    return false;
+  }
+
+  if (isTokenExpired(token)) {
+    clearSession();
+    return false;
+  }
+
+  return true;
 }
 
 export function clearSession() {
   localStorage.removeItem(SESSION_STORAGE_KEY);
 }
 
-// This module is the persistence boundary. Moving to HttpOnly cookies only
-// requires replacing its storage/header behavior, not the callers' contracts.
+// Este módulo é responsável pela persistência da sessão.
+// Se futuramente migrarmos para cookies HttpOnly, será necessário
+// alterar apenas a forma de armazenamento e envio da sessão,
+// sem precisar alterar os módulos que utilizam este serviço.

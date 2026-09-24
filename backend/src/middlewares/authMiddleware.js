@@ -3,27 +3,46 @@ const { verifyAccessToken } = require('../utils/auth');
 function authenticate(req, res, next) {
   const authorization = req.headers.authorization;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Authentication required' });
+  if (
+    typeof authorization !== 'string' ||
+    !authorization.startsWith('Bearer ')
+  ) {
+    return res.status(401).json({
+      error: 'Authentication required'
+    });
   }
 
   const token = authorization.slice(7).trim();
 
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
+  if (!token || token.length > 4096) {
+    return res.status(401).json({
+      error: 'Invalid authentication token'
+    });
   }
 
   try {
     const payload = verifyAccessToken(token);
 
-    if (typeof payload.sub !== 'string') {
-      return res.status(401).json({ error: 'Invalid authentication token' });
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      typeof payload.sub !== 'string' ||
+      !payload.sub.trim()
+    ) {
+      return res.status(401).json({
+        error: 'Invalid authentication token'
+      });
     }
 
-    req.user = { id: payload.sub };
+    req.user = {
+      id: payload.sub
+    };
+
     return next();
   } catch {
-    return res.status(401).json({ error: 'Invalid or expired authentication token' });
+    return res.status(401).json({
+      error: 'Invalid or expired authentication token'
+    });
   }
 }
 
