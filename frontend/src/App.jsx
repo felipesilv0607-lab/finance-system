@@ -13,7 +13,7 @@ import Expenses from './pages/Expenses';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/finance-system">
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
