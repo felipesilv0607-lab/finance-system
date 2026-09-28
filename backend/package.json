@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node --test tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js"
+    "test": "node --test tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
