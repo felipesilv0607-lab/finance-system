@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://finance-system-hf2u.onrender.com/api';
 const SESSION_STORAGE_KEY = 'finance-system.session';
 
 function readSession() {
