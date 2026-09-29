@@ -1,4 +1,6 @@
-﻿function Sidebar({ isOpen, onClose }) {
+﻿import { Link } from 'react-router-dom';
+
+function Sidebar({ isOpen, onClose }) {
   function handleNavigation() {
     if (onClose) {
       onClose();
@@ -12,12 +14,29 @@
       </div>
 
       <nav className="sidebar-nav">
-        <a href="/" onClick={handleNavigation}>Dashboard</a>
-        <a href="/accounts" onClick={handleNavigation}>Contas</a>
-        <a href="/categories" onClick={handleNavigation}>Categorias</a>
-        <a href="/transactions" onClick={handleNavigation}>Transações</a>
-        <a href="/income" onClick={handleNavigation}>Receitas</a>
-        <a href="/expenses" onClick={handleNavigation}>Despesas</a>
+        <Link to="/" onClick={handleNavigation}>
+          Dashboard
+        </Link>
+
+        <Link to="/accounts" onClick={handleNavigation}>
+          Contas
+        </Link>
+
+        <Link to="/categories" onClick={handleNavigation}>
+          Categorias
+        </Link>
+
+        <Link to="/transactions" onClick={handleNavigation}>
+          Transações
+        </Link>
+
+        <Link to="/income" onClick={handleNavigation}>
+          Receitas
+        </Link>
+
+        <Link to="/expenses" onClick={handleNavigation}>
+          Despesas
+        </Link>
       </nav>
     </aside>
   );
