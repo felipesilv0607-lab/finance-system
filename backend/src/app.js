@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
 const accountsRoutes = require('./routes/accounts');
@@ -8,7 +9,17 @@ const transactionsRoutes = require('./routes/transactions');
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173'
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins
+  })
+);
+
 app.use(express.json({ limit: '100kb' }));
 
 app.use('/api/health', healthRoutes);
