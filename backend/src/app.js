@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-
+const helmet = require('helmet');
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
 const accountsRoutes = require('./routes/accounts');
@@ -20,6 +20,7 @@ app.use(
   })
 );
 
+app.use(helmet());
 app.use(express.json({ limit: '100kb' }));
 
 app.use('/api/health', healthRoutes);
