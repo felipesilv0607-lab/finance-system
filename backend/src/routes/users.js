@@ -1,11 +1,14 @@
 const express = require('express');
 const usersController = require('../controllers/usersController');
 const { authenticate } = require('../middlewares/authMiddleware');
-const { loginRateLimit } = require('../middlewares/rateLimitMiddleware');
+const {
+  loginRateLimit,
+  registerRateLimit
+} = require('../middlewares/rateLimitMiddleware');
 
 const router = express.Router();
 
-router.post('/', usersController.createUser);
+router.post('/', registerRateLimit, usersController.createUser);
 router.post('/login', loginRateLimit, usersController.loginUser);
 router.use(authenticate);
 router.get('/', usersController.getUsers);
