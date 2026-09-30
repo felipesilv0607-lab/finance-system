@@ -41,7 +41,12 @@ function createToken(userId) {
   return jwt.sign(
     { sub: userId },
     process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    {
+      algorithm: 'HS256',
+      expiresIn: '1h',
+      issuer: process.env.JWT_ISSUER || 'finance-system-api',
+      audience: process.env.JWT_AUDIENCE || 'finance-system-client'
+    }
   );
 }
 
