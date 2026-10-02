@@ -1,6 +1,6 @@
 import { clearSession, getAuthorizationHeader } from './authService';
+import { API_URL } from '../config/api';
 
-const API_URL = 'https://finance-system-hf2u.onrender.com/api';
 
 async function request(path, options = {}) {
   const headers = {
