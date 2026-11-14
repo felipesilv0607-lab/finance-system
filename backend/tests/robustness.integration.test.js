@@ -101,3 +101,55 @@ test('listagem de transações valida e aplica filtros/paginação opcionais', a
     await prisma.user.delete({ where: { id: user.id } });
   }
 });
+
+test('categoria em uso não pode mudar de tipo, mas pode ser renomeada', async () => {
+  const bcrypt = require('bcryptjs');
+  const jwt = require('jsonwebtoken');
+  const user = await prisma.user.create({
+    data: {
+      name: 'Cat Type',
+      email: `cattype-${crypto.randomUUID()}@test.com`,
+      passwordHash: await bcrypt.hash('Password123!', 4)
+    }
+  });
+  const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, {
+    algorithm: 'HS256',
+    expiresIn: '1h',
+    issuer: process.env.JWT_ISSUER || 'finance-system-api',
+    audience: process.env.JWT_AUDIENCE || 'finance-system-client'
+  });
+  const account = await prisma.account.create({
+    data: { userId: user.id, name: 'A', type: 'BANK' }
+  });
+  const used = await prisma.category.create({
+    data: { userId: user.id, name: 'Usada', type: 'INCOME' }
+  });
+  const unused = await prisma.category.create({
+    data: { userId: user.id, name: 'Livre', type: 'INCOME' }
+  });
+  await prisma.transaction.create({
+    data: {
+      userId: user.id, accountId: account.id, categoryId: used.id,
+      description: 'x', amount: '1.00', type: 'INCOME'
+    }
+  });
+
+  const server = app.listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  const base = `http://127.0.0.1:${server.address().port}/api/categories`;
+  const put = (id, body) =>
+    fetch(`${base}/${id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+  try {
+    assert.equal((await put(used.id, { name: 'Usada', type: 'EXPENSE' })).status, 409);
+    assert.equal((await put(used.id, { name: 'Renomeada', type: 'INCOME' })).status, 200);
+    assert.equal((await put(unused.id, { name: 'Livre', type: 'EXPENSE' })).status, 200);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await prisma.user.delete({ where: { id: user.id } });
+  }
+});

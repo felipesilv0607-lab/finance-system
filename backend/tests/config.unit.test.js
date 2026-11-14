@@ -43,3 +43,16 @@ test('getTrustProxy interpreta TRUST_PROXY com segurança', () => {
   assert.equal(getTrustProxy({ TRUST_PROXY: 'true' }), false);
   assert.equal(getTrustProxy({ TRUST_PROXY: '-2' }), false);
 });
+
+test('validateEnv rejeita o segredo de exemplo do .env.example', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const example = fs.readFileSync(path.join(__dirname, '..', '.env.example'), 'utf8');
+  const placeholder = example.match(/^JWT_SECRET="?([^"\r\n]+)"?/m)[1];
+
+  assert.ok(placeholder.length >= 32, 'o exemplo tem tamanho suficiente para passar só no tamanho');
+  assert.throws(
+    () => validateEnv({ ...validEnv, JWT_SECRET: placeholder }),
+    /placeholder/
+  );
+});

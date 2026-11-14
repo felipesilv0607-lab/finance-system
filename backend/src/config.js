@@ -9,6 +9,9 @@ function validateEnv(env = process.env) {
 
   if (!env.JWT_SECRET || env.JWT_SECRET.length < 32) {
     problems.push('JWT_SECRET must be set with at least 32 characters');
+  } else if (/replace-with|change-?me|your-secret|example/i.test(env.JWT_SECRET)) {
+    // O valor de .env.example tem mais de 32 caracteres e passaria na regra acima.
+    problems.push('JWT_SECRET still looks like a placeholder; generate a random value');
   }
 
   if (env.NODE_ENV === 'production' && !env.FRONTEND_URL) {
