@@ -43,8 +43,8 @@ async function validateAccountAndCategory({
   accountId,
   categoryId,
   type
-}) {
-  const account = await prisma.account.findFirst({
+}, db = prisma) {
+  const account = await db.account.findFirst({
     where: {
       id: accountId,
       userId
@@ -58,7 +58,7 @@ async function validateAccountAndCategory({
     throw createAccountNotFoundError();
   }
 
-  const category = await prisma.category.findFirst({
+  const category = await db.category.findFirst({
     where: {
       id: categoryId,
       userId
@@ -87,24 +87,24 @@ async function createTransaction({
   accountId,
   categoryId
 }) {
-  await validateAccountAndCategory({
-    userId,
-    accountId,
-    categoryId,
-    type
-  });
+  return prisma.$transaction(async (tx) => {
+    await validateAccountAndCategory(
+      { userId, accountId, categoryId, type },
+      tx
+    );
 
-  return prisma.transaction.create({
-    data: {
-      userId,
-      description,
-      amount,
-      type,
-      date,
-      accountId,
-      categoryId
-    },
-    select: transactionSelect
+    return tx.transaction.create({
+      data: {
+        userId,
+        description,
+        amount,
+        type,
+        date,
+        accountId,
+        categoryId
+      },
+      select: transactionSelect
+    });
   });
 }
 
@@ -134,49 +134,28 @@ async function getTransactionById(id, userId) {
 async function updateTransaction(
   id,
   userId,
-  {
-    description,
-    amount,
-    type,
-    date,
-    accountId,
-    categoryId
-  }
+  { description, amount, type, date, accountId, categoryId }
 ) {
-  const existingTransaction = await prisma.transaction.findFirst({
-    where: {
-      id,
-      userId
-    },
-    select: {
-      id: true
+  return prisma.$transaction(async (tx) => {
+    const existingTransaction = await tx.transaction.findFirst({
+      where: { id, userId },
+      select: { id: true }
+    });
+
+    if (!existingTransaction) {
+      throw createNotFoundError();
     }
-  });
 
-  if (!existingTransaction) {
-    throw createNotFoundError();
-  }
+    await validateAccountAndCategory(
+      { userId, accountId, categoryId, type },
+      tx
+    );
 
-  await validateAccountAndCategory({
-    userId,
-    accountId,
-    categoryId,
-    type
-  });
-
-  return prisma.transaction.update({
-    where: {
-      id
-    },
-    data: {
-      description,
-      amount,
-      type,
-      date,
-      accountId,
-      categoryId
-    },
-    select: transactionSelect
+    return tx.transaction.update({
+      where: { id },
+      data: { description, amount, type, date, accountId, categoryId },
+      select: transactionSelect
+    });
   });
 }
 
