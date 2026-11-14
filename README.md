@@ -67,13 +67,17 @@ A aplicação foi construída com uma separação clara entre **frontend e backe
   - transação.
 - Formatação de valores monetários na interface
 
+### 📊 Dashboard e saldos
+
+- Saldo atual por conta (saldo inicial + receitas − despesas), calculado no servidor
+- Resumo do mês: saldo total, receitas, despesas e últimas movimentações
+- Valores monetários como string decimal exata, sem `float`
+
 ### 🧪 Testes
 
-O backend possui testes automatizados relacionados principalmente à autenticação e isolamento de dados.
+```bash
+cd backend  && npm test        # unitários + integração (requer PostgreSQL)
+cd frontend && npm run lint && npm test && npm run build
+```
 
-A suíte atual foi executada com sucesso:
-
-```text
-4 testes
-4 aprovados
-0 falhas
+O workflow `.github/workflows/ci.yml` executa tudo isso a cada PR.
