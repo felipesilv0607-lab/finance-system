@@ -108,6 +108,14 @@ export function isAuthenticated() {
   return true;
 }
 
+export function getCurrentUser() {
+  return readSession()?.user ?? null;
+}
+
+export function logout() {
+  clearSession();
+}
+
 export function clearSession() {
   localStorage.removeItem(SESSION_STORAGE_KEY);
 }

@@ -51,31 +51,44 @@ function Transactions() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  async function loadData() {
-    try {
-      setLoading(true);
-      setError('');
+  const [reloadKey, setReloadKey] = useState(0);
 
-      const [transactionsData, accountsData, categoriesData] =
-        await Promise.all([
-          getTransactions(filterType || undefined),
-          getAccounts(),
-          getCategories()
-        ]);
-
-      setTransactions(transactionsData);
-      setAccounts(accountsData);
-      setCategories(categoriesData);
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setLoading(false);
-    }
+  function reload() {
+    setReloadKey((current) => current + 1);
   }
 
   useEffect(() => {
-    loadData();
-  }, [filterType]);
+    let active = true;
+
+    Promise.all([
+      getTransactions(filterType || undefined),
+      getAccounts(),
+      getCategories()
+    ])
+      .then(([transactionsData, accountsData, categoriesData]) => {
+        if (!active) return;
+
+        setTransactions(transactionsData);
+        setAccounts(accountsData);
+        setCategories(categoriesData);
+      })
+      .catch((requestError) => {
+        if (active) setError(getErrorMessage(requestError));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [filterType, reloadKey]);
+
+  function handleFilterChange(event) {
+    setLoading(true);
+    setError('');
+    setFilterType(event.target.value);
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -158,7 +171,7 @@ function Transactions() {
       }
 
       resetForm();
-      await loadData();
+      reload();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     } finally {
@@ -187,7 +200,7 @@ function Transactions() {
         resetForm();
       }
 
-      await loadData();
+      reload();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     }
@@ -437,9 +450,7 @@ function Transactions() {
               <select
                 id="filterType"
                 value={filterType}
-                onChange={(event) =>
-                  setFilterType(event.target.value)
-                }
+                onChange={handleFilterChange}
               >
                 <option value="">Todas</option>
                 <option value="INCOME">

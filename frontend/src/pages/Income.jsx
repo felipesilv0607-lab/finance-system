@@ -36,36 +36,40 @@ function Income() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  async function loadData() {
-    try {
-      setLoading(true);
-      setError('');
+  const [reloadKey, setReloadKey] = useState(0);
 
-      const [transactionsData, accountsData, categoriesData] =
-        await Promise.all([
-          getTransactions('INCOME'),
-          getAccounts(),
-          getCategories()
-        ]);
-
-      setTransactions(transactionsData || []);
-      setAccounts(accountsData || []);
-
-      setCategories(
-        (categoriesData || []).filter(
-          (category) => category.type === 'INCOME'
-        )
-      );
-    } catch (err) {
-      setError(err.message || 'Não foi possível carregar as receitas.');
-    } finally {
-      setLoading(false);
-    }
+  function reload() {
+    setReloadKey((current) => current + 1);
   }
 
   useEffect(() => {
-    loadData();
-  }, []);
+    let active = true;
+
+    Promise.all([
+      getTransactions('INCOME'),
+      getAccounts(),
+      getCategories()
+    ])
+      .then(([transactionsData, accountsData, categoriesData]) => {
+        if (!active) return;
+
+        setTransactions(transactionsData || []);
+        setAccounts(accountsData || []);
+        setCategories(
+          (categoriesData || []).filter((category) => category.type === 'INCOME')
+        );
+      })
+      .catch((err) => {
+        if (active) setError(err.message || 'Não foi possível carregar as receitas.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
 
   const totalIncome = useMemo(() => {
     return sumAmounts(transactions.map((transaction) => transaction.amount));
@@ -118,7 +122,7 @@ function Income() {
       }
 
       resetForm();
-      await loadData();
+      reload();
     } catch (err) {
       setError(err.message || 'Não foi possível salvar a receita.');
     } finally {
@@ -164,7 +168,7 @@ function Income() {
       }
 
       setSuccess('Receita excluída com sucesso.');
-      await loadData();
+      reload();
     } catch (err) {
       setError(err.message || 'Não foi possível excluir a receita.');
     }
