@@ -108,16 +108,21 @@ async function createTransaction({
   });
 }
 
-async function getTransactions(userId, type) {
+// Filtros opcionais: type, from (inclusivo), to (exclusivo), limit, offset.
+// Sem limit, mantém o comportamento original (lista completa).
+async function getTransactions(userId, { type, from, to, limit, offset } = {}) {
   return prisma.transaction.findMany({
     where: {
-        userId, 
-          ...(type ? { type } : {})
+      userId,
+      ...(type ? { type } : {}),
+      ...(from || to
+        ? { date: { ...(from ? { gte: from } : {}), ...(to ? { lt: to } : {}) } }
+        : {})
     },
     select: transactionSelect,
-    orderBy: {
-      date: 'desc'
-    }
+    orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }],
+    ...(limit ? { take: limit } : {}),
+    ...(offset ? { skip: offset } : {})
   });
 }
 

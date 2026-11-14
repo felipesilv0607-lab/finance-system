@@ -35,3 +35,69 @@ test('rota inexistente retorna 404 JSON e cadastro simultâneo retorna 409 (não
     await prisma.user.deleteMany({ where: { email } });
   }
 });
+
+test('listagem de transações valida e aplica filtros/paginação opcionais', async () => {
+  const bcrypt = require('bcryptjs');
+  const jwt = require('jsonwebtoken');
+  const user = await prisma.user.create({
+    data: {
+      name: 'List Test',
+      email: `list-${crypto.randomUUID()}@test.com`,
+      passwordHash: await bcrypt.hash('Password123!', 4)
+    }
+  });
+  const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, {
+    algorithm: 'HS256',
+    expiresIn: '1h',
+    issuer: process.env.JWT_ISSUER || 'finance-system-api',
+    audience: process.env.JWT_AUDIENCE || 'finance-system-client'
+  });
+  const account = await prisma.account.create({
+    data: { userId: user.id, name: 'A', type: 'BANK' }
+  });
+  const category = await prisma.category.create({
+    data: { userId: user.id, name: 'C', type: 'INCOME' }
+  });
+
+  for (const day of ['01', '02', '03']) {
+    await prisma.transaction.create({
+      data: {
+        userId: user.id, accountId: account.id, categoryId: category.id,
+        description: `dia ${day}`, amount: '10.00', type: 'INCOME',
+        date: new Date(`2026-03-${day}T12:00:00Z`)
+      }
+    });
+  }
+
+  const server = app.listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  const base = `http://127.0.0.1:${server.address().port}/api/transactions`;
+  const list = async (query) => {
+    const response = await fetch(`${base}${query}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return { status: response.status, body: await response.json() };
+  };
+
+  try {
+    assert.equal((await list('')).body.length, 3);
+    assert.deepEqual(
+      (await list('?limit=2')).body.map((t) => t.description),
+      ['dia 03', 'dia 02']
+    );
+    assert.deepEqual(
+      (await list('?limit=2&offset=2')).body.map((t) => t.description),
+      ['dia 01']
+    );
+    assert.equal(
+      (await list('?from=2026-03-02T00:00:00Z&to=2026-03-03T00:00:00Z')).body.length,
+      1
+    );
+    for (const bad of ['?limit=0', '?limit=501', '?limit=abc', '?offset=-1', '?from=x', '?type=NOPE']) {
+      assert.equal((await list(bad)).status, 400, bad);
+    }
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await prisma.user.delete({ where: { id: user.id } });
+  }
+});
