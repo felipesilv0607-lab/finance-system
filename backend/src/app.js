@@ -6,6 +6,7 @@ const usersRoutes = require('./routes/users');
 const accountsRoutes = require('./routes/accounts');
 const categoriesRoutes = require('./routes/categories');
 const transactionsRoutes = require('./routes/transactions');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/transactions', transactionsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/categories', categoriesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);
