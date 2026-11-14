@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import { formatCurrency, sumAmounts, toAmountPayload } from '../utils/money';
+import { apiDateToInputValue, formatDate, toDateInputValue } from '../utils/date';
 import {
   createTransaction,
   deleteTransaction,
@@ -13,22 +15,6 @@ import {
   formatAmountOnBlur,
 } from '../utils/amount';
 
-function getToday() {
-  return new Date().toISOString().split('T')[0];
-}
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
-}
-
-function formatDate(date) {
-  const datePart = String(date).slice(0, 10);
-
-  return new Date(`${datePart}T00:00:00`).toLocaleDateString('pt-BR');
-}
 
 function Income() {
   const [transactions, setTransactions] = useState([]);
@@ -38,7 +24,7 @@ function Income() {
   const [form, setForm] = useState({
     description: '',
     amount: '',
-    date: getToday(),
+    date: toDateInputValue(),
     accountId: '',
     categoryId: ''
   });
@@ -82,10 +68,7 @@ function Income() {
   }, []);
 
   const totalIncome = useMemo(() => {
-    return transactions.reduce(
-      (total, transaction) => total + Number(transaction.amount),
-      0
-    );
+    return sumAmounts(transactions.map((transaction) => transaction.amount));
   }, [transactions]);
 
   function handleChange(event) {
@@ -101,7 +84,7 @@ function Income() {
     setForm({
       description: '',
       amount: '',
-      date: getToday(),
+      date: toDateInputValue(),
       accountId: '',
       categoryId: ''
     });
@@ -119,7 +102,7 @@ function Income() {
 
       const transactionData = {
         description: form.description,
-        amount: Number(form.amount),
+        amount: toAmountPayload(form.amount),
         type: 'INCOME',
         date: form.date,
         accountId: form.accountId,
@@ -149,7 +132,7 @@ function Income() {
     setForm({
       description: transaction.description,
       amount: formatAmountInput(String(transaction.amount)),
-      date: transaction.date?.slice(0, 10),
+      date: apiDateToInputValue(transaction.date),
       accountId: transaction.accountId,
       categoryId: transaction.categoryId
     });

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import { formatCurrency, toAmountPayload } from '../utils/money';
+import { apiDateToInputValue, formatDate, toDateInputValue } from '../utils/date';
 import {
   createTransaction,
   getTransactions,
@@ -17,21 +19,10 @@ const initialForm = {
   description: '',
   amount: '',
   type: 'EXPENSE',
-  date: new Date().toISOString().split('T')[0],
+  date: toDateInputValue(),
   accountId: '',
   categoryId: ''
 };
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
-}
-
-function formatDate(value) {
-  return new Date(value).toLocaleDateString('pt-BR');
-}
 
 function getErrorMessage(error) {
   if (error?.details) {
@@ -127,9 +118,7 @@ function Transactions() {
       description: transaction.description,
       amount: formatAmountInput(String(transaction.amount)),
       type: transaction.type,
-      date: new Date(transaction.date)
-        .toISOString()
-        .split('T')[0],
+      date: apiDateToInputValue(transaction.date),
       accountId: transaction.accountId,
       categoryId: transaction.categoryId
     });
@@ -153,7 +142,7 @@ function Transactions() {
 
       const payload = {
         description: form.description.trim(),
-        amount: Number(form.amount),
+        amount: toAmountPayload(form.amount),
         type: form.type,
         date: new Date(`${form.date}T12:00:00`).toISOString(),
         accountId: form.accountId,
