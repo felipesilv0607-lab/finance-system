@@ -24,3 +24,11 @@ Trafegam como string decimal exata (`"1234.50"`, até 2 casas). Notação cient�
 
 ## Migrations
 `20261113180000_transaction_indexes_and_amount_check` adiciona a constraint `transactions_amount_positive` como `NOT VALID` (não falha com dado legado). Após conferir os dados: `ALTER TABLE "transactions" VALIDATE CONSTRAINT "transactions_amount_positive";`
+
+## Deploy no Render
+- **Root Directory:** `backend` · **Node:** `.node-version`/`engines` exigem ≥ 22.12 (requisito do Prisma 7); se necessário defina também `NODE_VERSION=22.12.0` no serviço.
+- **Build Command:** `npm ci && npx prisma migrate deploy` (o `postinstall` roda `prisma generate`, que **exige `DATABASE_URL` já disponível no build**). O Pre-Deploy Command do Render não existe em todos os planos; por isso a migration roda no build.
+- **Start Command:** `npm start`
+- **Variáveis:** `DATABASE_URL`, `JWT_SECRET` (aleatório, ≥ 32 caracteres; gere com `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`), `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_EXPIRES_IN`, `FRONTEND_URL` (apenas a origem, ex.: `https://usuario.github.io`), `NODE_ENV=production`, `TRUST_PROXY=1`. O `PORT` é definido pelo Render.
+- **Banco externo:** use a URL interna do Render; se usar a externa, acrescente `?sslmode=require`.
+- **Health check:** `/api/health` (não consulta o banco).
