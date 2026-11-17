@@ -108,13 +108,25 @@ async function createTransaction({
   });
 }
 
-// Filtros opcionais: type, from (inclusivo), to (exclusivo), limit, offset.
+// Filtros opcionais: type, accountId, categoryId, q (descrição, sem diferenciar
+// maiúsculas), from (inclusivo), to (exclusivo), limit, offset.
 // Sem limit, mantém o comportamento original (lista completa).
-async function getTransactions(userId, { type, from, to, limit, offset } = {}) {
+// Prisma repassa % e _ ao LIKE sem escapar; escapa-os para a busca ser literal.
+function escapeLike(value) {
+  return value.replace(/[\\%_]/g, '\\$&');
+}
+
+async function getTransactions(
+  userId,
+  { type, from, to, accountId, categoryId, q, limit, offset } = {}
+) {
   return prisma.transaction.findMany({
     where: {
       userId,
       ...(type ? { type } : {}),
+      ...(accountId ? { accountId } : {}),
+      ...(categoryId ? { categoryId } : {}),
+      ...(q ? { description: { contains: escapeLike(q), mode: 'insensitive' } } : {}),
       ...(from || to
         ? { date: { ...(from ? { gte: from } : {}), ...(to ? { lt: to } : {}) } }
         : {})
