@@ -31,6 +31,23 @@ async function comparePassword(password, passwordHash) {
   return bcrypt.compare(password, passwordHash);
 }
 
+// Hash descartável com o mesmo custo dos reais. Usado quando o e-mail não
+// existe, para o login gastar o mesmo tempo de bcrypt nos dois casos.
+let dummyHashPromise;
+
+function getDummyHash() {
+  dummyHashPromise ??= bcrypt.hash('dummy-password-for-timing', SALT_ROUNDS);
+  return dummyHashPromise;
+}
+
+// Sempre executa um bcrypt.compare; só retorna true para usuário real e senha certa.
+async function verifyLoginPassword(password, passwordHash) {
+  const hasHash = typeof passwordHash === 'string' && passwordHash.length > 0;
+  const matches = await bcrypt.compare(password, hasHash ? passwordHash : await getDummyHash());
+
+  return hasHash && matches;
+}
+
 function createAccessToken(user) {
   return jwt.sign({ sub: user.id }, getJwtSecret(), {
     algorithm: 'HS256',
@@ -51,6 +68,7 @@ function verifyAccessToken(token) {
 module.exports = {
   hashPassword,
   comparePassword,
+  verifyLoginPassword,
   createAccessToken,
   verifyAccessToken
 };
