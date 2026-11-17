@@ -8,7 +8,7 @@ const app = require('../src/app');
 const prisma = require('../src/lib/prisma');
 
 const testRunId = crypto.randomUUID();
-const password = 'Passw0rd';
+const password = 'Passw0rd-Test1';
 const emails = [
   `categories-a-${testRunId}@example.test`,
   `categories-b-${testRunId}@example.test`

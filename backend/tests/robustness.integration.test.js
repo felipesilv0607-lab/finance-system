@@ -21,7 +21,7 @@ test('rota inexistente retorna 404 JSON e cadastro simultâneo retorna 409 (não
       fetch(`${base}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Race User', email, password: 'Passw0rd!' })
+        body: JSON.stringify({ name: 'Race User', email, password: 'Passw0rd!Race1' })
       });
 
     const statuses = (await Promise.all([register(), register(), register()]))

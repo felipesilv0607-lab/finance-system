@@ -56,3 +56,15 @@ test('validateEnv rejeita o segredo de exemplo do .env.example', () => {
     /placeholder/
   );
 });
+
+test('validateEnv limita a validade do token entre 1 minuto e 24 horas', () => {
+  for (const ok of ['15m', '1h', '24h', '1d', '900', '60s']) {
+    assert.doesNotThrow(() => validateEnv({ ...validEnv, JWT_EXPIRES_IN: ok }), ok);
+  }
+
+  for (const bad of ['30s', '2d', '365d', '0', 'abc', '-1h', '1 semana']) {
+    assert.throws(() => validateEnv({ ...validEnv, JWT_EXPIRES_IN: bad }), /JWT_EXPIRES_IN/, bad);
+  }
+
+  assert.doesNotThrow(() => validateEnv({ ...validEnv, JWT_EXPIRES_IN: '' }));
+});

@@ -9,7 +9,7 @@ const app = require('../src/app');
 const prisma = require('../src/lib/prisma');
 
 const testRunId = crypto.randomUUID();
-const password = 'Passw0rd';
+const password = 'Passw0rd-Test1';
 const testEmails = [
   `auth-a-${testRunId}@example.test`,
   `auth-b-${testRunId}@example.test`
@@ -53,7 +53,7 @@ test('authentication and account authorization flow', async () => {
     assert.equal(shortPasswordRegistration.status, 400);
     assert.equal(
       shortPasswordRegistration.body.details.password,
-      'Password must be at least 8 characters long'
+      'Password must be at least 10 characters long'
     );
 
     const registrationA = await request('/users', {
