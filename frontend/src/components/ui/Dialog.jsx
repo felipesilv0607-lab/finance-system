@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef } from 'react';
+import { useId, useRef } from 'react';
 import { cx } from '../../utils/cx';
+import useModalDialog from '../../hooks/useModalDialog';
 import Button from './Button';
 import IconButton from './IconButton';
 
@@ -20,34 +21,7 @@ function Dialog({
   const titleId = useId();
   const descriptionId = useId();
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-
-    if (!dialog) return undefined;
-
-    if (open && !dialog.open) {
-      dialog.showModal();
-      // O foco inicial nativo vai para o 1º controle (o botão Fechar). Quem
-      // precisar de outro destino marca o elemento com data-autofocus.
-      dialog.querySelector('[data-autofocus]')?.focus();
-    } else if (!open && dialog.open) {
-      dialog.close();
-    }
-
-    return undefined;
-  }, [open]);
-
-  // Trava a rolagem da página enquanto o modal está aberto.
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [open]);
+  useModalDialog(dialogRef, open);
 
   function handleCancel(event) {
     // ESC: o estado quem manda, o pai decide fechar.

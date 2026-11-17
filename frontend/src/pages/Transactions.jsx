@@ -227,15 +227,11 @@ function Transactions() {
   }
 
   return (
-    <AppLayout title="Transações" section="FINANÇAS">
+    <AppLayout
+      title="Transações"
+      description="Gerencie suas receitas e despesas."
+    >
       <div className="page-container">
-
-        <div className="page-header">
-          <div>
-            <h1>Transações</h1>
-            <p>Gerencie suas receitas e despesas.</p>
-          </div>
-        </div>
 
         {error && (
           <div className="alert alert-error">
@@ -554,4 +550,4 @@ function Transactions() {
   );
 }
 
-export default Transactions;
+export default Transactions;

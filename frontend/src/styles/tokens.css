@@ -61,12 +61,16 @@
   --bg-subtle: var(--color-neutral-25);
   --bg-muted: var(--color-neutral-100);
   --bg-sidebar: var(--color-neutral-950);
+  --bg-sidebar-hover: #181d29;
+  --bg-sidebar-active: var(--color-primary-900);
   --bg-hero: linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-700) 55%, var(--color-primary-600) 100%);
 
   --text-primary: var(--color-neutral-900);
   --text-secondary: var(--color-neutral-500);
   --text-placeholder: #6a7385;
   --text-inverse: var(--color-neutral-0);
+  --text-sidebar: var(--color-neutral-300);
+  --text-sidebar-muted: #8f99ab;
   --text-link: var(--color-primary-700);
   --text-income: var(--color-success-700);
   --text-expense: var(--color-danger-700);

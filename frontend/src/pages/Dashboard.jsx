@@ -35,14 +35,11 @@ function Dashboard() {
   const value = (key) => (loading || error ? '—' : formatCurrency(summary?.[key]));
 
   return (
-    <AppLayout title="Dashboard" section="VISÃO GERAL">
+    <AppLayout
+      title="Dashboard"
+      description="Acompanhe suas contas, receitas e despesas em um só lugar."
+    >
       <section className="dashboard">
-        <div className="dashboard-welcome">
-          <span>VISÃO GERAL</span>
-          <h2>Seu dinheiro, sob controle.</h2>
-          <p>Acompanhe suas contas, receitas e despesas em um só lugar.</p>
-        </div>
-
         {error && (
           <div className="dashboard-section" role="alert">
             <p>{error}</p>

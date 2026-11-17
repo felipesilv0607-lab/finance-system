@@ -99,14 +99,11 @@ function Categories() {
   }
 
   return (
-    <AppLayout title="Categorias" section="FINANÇAS">
+    <AppLayout
+      title="Categorias"
+      description="Organize receitas e despesas para os próximos lançamentos."
+    >
       <section className="dashboard">
-        <div className="dashboard-welcome">
-          <span>FINANÇAS</span>
-          <h2>Minhas categorias</h2>
-          <p>Organize receitas e despesas para os próximos lançamentos.</p>
-        </div>
-
         <section className="dashboard-section category-form-section">
           <div className="section-heading">
             <div>

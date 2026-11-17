@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import useFocusNewEntry from '../hooks/useFocusNewEntry';
 import { formatCurrency, sumAmounts, toAmountPayload } from '../utils/money';
 import { apiDateToInputValue, formatDate, toDateInputValue } from '../utils/date';
 import {
@@ -17,6 +18,8 @@ import {
 
 
 function Income() {
+  useFocusNewEntry('description');
+
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -175,14 +178,10 @@ function Income() {
   }
 
   return (
-    <AppLayout title="Receitas" section="FINANÇAS">
-      <div className="page-container">
-        <div>
-          <h2>Receitas</h2>
-          <p>Gerencie suas entradas de dinheiro.</p>
-        </div>
-      </div>
-
+    <AppLayout
+      title="Receitas"
+      description="Gerencie suas entradas de dinheiro."
+    >
       {error && (
         <div className="alert alert-error">
           {error}
@@ -455,4 +454,4 @@ function Income() {
   );
 }
 
-export default Income;
+export default Income;

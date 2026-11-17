@@ -624,3 +624,211 @@ select.ui-field__input {
 .ui-empty__action {
   margin-top: var(--space-5);
 }
+
+/* ---- Avatar ------------------------------------------------------------- */
+.ui-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-100);
+  color: var(--color-primary-800);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.ui-avatar--lg {
+  width: 40px;
+  height: 40px;
+  font-size: var(--fs-base);
+}
+
+/* ---- Logo --------------------------------------------------------------- */
+.ui-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-primary);
+}
+
+.ui-logo__mark {
+  flex: none;
+}
+
+.ui-logo__name {
+  font-size: var(--fs-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.ui-logo__name-light {
+  font-weight: var(--weight-regular);
+  color: var(--text-secondary);
+}
+
+.ui-logo--inverse {
+  color: var(--text-inverse);
+}
+
+.ui-logo--inverse .ui-logo__name-light {
+  color: var(--text-sidebar-muted);
+}
+
+/* ---- Popover (disclosure) ----------------------------------------------- */
+.ui-popover {
+  position: relative;
+}
+
+.ui-popover__trigger {
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ui-popover__trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.ui-popover__panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  z-index: calc(var(--z-sticky) + 10);
+  min-width: 232px;
+  max-width: calc(100vw - var(--space-8));
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg);
+  animation: ui-pop var(--duration-base) var(--ease-out);
+}
+
+.ui-popover__panel:focus {
+  outline: none;
+}
+
+.ui-popover__panel--end {
+  right: 0;
+}
+
+.ui-popover__panel--start {
+  left: 0;
+}
+
+.ui-popover__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-popover__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--fs-base);
+  font-weight: var(--weight-medium);
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.ui-popover__item:hover {
+  background: var(--bg-muted);
+}
+
+.ui-popover__item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.ui-popover__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ui-popover__identity > div {
+  min-width: 0;
+}
+
+.ui-popover__identity-name,
+.ui-popover__identity-email {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-popover__identity-name {
+  font-weight: var(--weight-semibold);
+}
+
+.ui-popover__identity-email {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+/* ---- Drawer (gaveta lateral sobre <dialog>) ----------------------------- */
+.ui-drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: min(300px, 86vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--bg-sidebar);
+  color: var(--text-sidebar);
+  overflow: hidden;
+  z-index: var(--z-dialog);
+}
+
+.ui-drawer::backdrop {
+  background: rgb(13 17 26 / 0.55);
+}
+
+.ui-drawer__panel {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: ui-drawer-in var(--duration-slow) var(--ease-out);
+}
+
+.ui-drawer__close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-3);
+  z-index: 1;
+  color: var(--text-sidebar);
+}
+
+.ui-drawer__close:hover:not(:disabled) {
+  background: var(--bg-sidebar-hover);
+  color: var(--text-inverse);
+}
+
+@keyframes ui-drawer-in {
+  from {
+    transform: translateX(-24px);
+    opacity: 0;
+  }
+}

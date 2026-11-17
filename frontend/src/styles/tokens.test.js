@@ -63,6 +63,11 @@ const textPairs = [
   ['--color-warning-700', '--color-warning-50'],
   ['--color-info-700', '--color-info-50'],
   ['--color-neutral-700', '--color-neutral-100'],
+  ['--text-sidebar', '--bg-sidebar'],
+  ['--text-sidebar-muted', '--bg-sidebar'],
+  ['--text-inverse', '--bg-sidebar'],
+  ['--text-inverse', '--bg-sidebar-hover'],
+  ['--text-inverse', '--bg-sidebar-active'],
 ];
 
 for (const [fg, bg] of textPairs) {
