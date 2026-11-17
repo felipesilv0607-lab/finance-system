@@ -1,5 +1,18 @@
 // Validação de ambiente no boot: falha rápido, com mensagem clara,
 // em vez de quebrar na primeira requisição.
+const MAX_TOKEN_SECONDS = 24 * 60 * 60;
+
+// Aceita o formato do jsonwebtoken para durações: 900, "15m", "1h", "1d".
+function parseDurationSeconds(value) {
+  const match = /^(\d+)\s*(s|m|h|d)?$/.exec(String(value).trim());
+
+  if (!match) return null;
+
+  const unit = { s: 1, m: 60, h: 3600, d: 86400 }[match[2] ?? 's'];
+
+  return Number(match[1]) * unit;
+}
+
 function validateEnv(env = process.env) {
   const problems = [];
 
@@ -12,6 +25,14 @@ function validateEnv(env = process.env) {
   } else if (/replace-with|change-?me|your-secret|example/i.test(env.JWT_SECRET)) {
     // O valor de .env.example tem mais de 32 caracteres e passaria na regra acima.
     problems.push('JWT_SECRET still looks like a placeholder; generate a random value');
+  }
+
+  if (env.JWT_EXPIRES_IN !== undefined && env.JWT_EXPIRES_IN !== '') {
+    const seconds = parseDurationSeconds(env.JWT_EXPIRES_IN);
+
+    if (seconds === null || seconds < 60 || seconds > MAX_TOKEN_SECONDS) {
+      problems.push('JWT_EXPIRES_IN must be between 1 minute and 24 hours (e.g. 15m, 1h)');
+    }
   }
 
   if (env.NODE_ENV === 'production' && !env.FRONTEND_URL) {
