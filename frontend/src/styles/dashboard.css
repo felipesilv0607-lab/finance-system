@@ -1,0 +1,345 @@
+/* Dashboard (Etapa 3). Usa só tokens; sem dependência das regras legadas. */
+
+.dash {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.dash-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: var(--space-4);
+  align-items: end;
+}
+
+.dash-filters__clear {
+  align-self: end;
+}
+
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.dash-kpi {
+  display: grid;
+  gap: var(--space-2);
+  border-top: 3px solid var(--accent);
+}
+
+.dash-kpi--income {
+  border-top-color: var(--color-success-700);
+}
+
+.dash-kpi--expense {
+  border-top-color: var(--color-danger-500);
+}
+
+.dash-kpi__label {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
+}
+
+.dash-kpi__value {
+  font-size: var(--fs-2xl);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.dash-kpi__hint {
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.dash-panel {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+  min-width: 0;
+}
+
+.dash-panel__empty,
+.dash-note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-base);
+}
+
+.dash-link {
+  color: var(--text-link);
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
+}
+
+.dash-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  color: var(--color-danger-800);
+  background: var(--color-danger-50);
+  border: 1px solid var(--color-danger-200);
+  border-radius: var(--radius-md);
+}
+
+.dash-error p {
+  margin: 0;
+}
+
+/* ---- Gráficos --------------------------------------------------------- */
+
+.dash-chart {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dash-chart__frame {
+  border-radius: var(--radius-sm);
+  touch-action: pan-y;
+}
+
+.dash-chart__frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dash-chart__grid {
+  stroke: var(--border-default);
+  stroke-width: 1;
+}
+
+.dash-chart__zero {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.dash-chart__guide {
+  stroke: var(--color-neutral-400);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.dash-chart__tick {
+  fill: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+}
+
+.dash-chart__readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  min-height: 1.5rem;
+  font-size: var(--fs-sm);
+}
+
+.dash-chart__hint {
+  color: var(--text-secondary);
+}
+
+.dash-chart__reading,
+.dash-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dash-chart__reading i,
+.dash-legend i,
+.dash-donut__legend i {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 3px;
+}
+
+.dash-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.dash-chart__data summary {
+  color: var(--text-link);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.dash-chart__data .table-container {
+  margin-top: var(--space-3);
+  max-height: 240px;
+  overflow: auto;
+}
+
+.dash-chart__data .table-container table {
+  min-width: 0;
+}
+
+/* ---- Rosca ------------------------------------------------------------ */
+
+.dash-donut {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+}
+
+.dash-donut__svg {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+}
+
+.dash-donut__label {
+  fill: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-sans);
+}
+
+.dash-donut__total {
+  fill: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+}
+
+.dash-donut__legend {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+}
+
+.dash-donut__legend li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.dash-donut__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-donut__pct {
+  min-width: 3.5rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* ---- Movimentações recentes ------------------------------------------ */
+
+.dash-activity {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-activity__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.dash-activity__item:last-child {
+  border-bottom: 0;
+}
+
+.dash-activity__main {
+  display: grid;
+  min-width: 0;
+}
+
+.dash-activity__title {
+  overflow: hidden;
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-activity__meta {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-activity__amount {
+  flex: none;
+  font-weight: var(--weight-semibold);
+}
+
+.dash-activity__amount.is-income {
+  color: var(--text-income);
+}
+
+.dash-activity__amount.is-expense {
+  color: var(--text-expense);
+}
+
+.dash-activity-skeleton {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* ---- Responsivo ------------------------------------------------------- */
+
+@media (max-width: 1280px) {
+  .dash-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .dash-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .dash-filters,
+  .dash-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dash-donut {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .dash-donut__legend {
+    width: 100%;
+  }
+}
