@@ -1,4 +1,5 @@
 const dashboardService = require('../services/dashboardService');
+const { parseOverviewQuery } = require('../utils/dashboardQuery');
 
 function parseDate(value) {
   if (value === undefined) return undefined;
@@ -44,4 +45,20 @@ async function getSummary(req, res, next) {
   }
 }
 
-module.exports = { getSummary, defaultPeriod };
+async function getOverview(req, res, next) {
+  try {
+    const { errors, params } = parseOverviewQuery(req.query);
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ error: 'Validation failed', details: errors });
+    }
+
+    return res.status(200).json(
+      await dashboardService.getOverview(req.user.id, params)
+    );
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { getSummary, getOverview, defaultPeriod };
