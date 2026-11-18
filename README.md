@@ -67,6 +67,28 @@ A aplicação foi construída com uma separação clara entre **frontend e backe
   - transação.
 - Formatação de valores monetários na interface
 
+
+### 🏷️ Categorias
+
+- Criação de categorias
+- Edição
+- Exclusão
+- Separação entre categorias de receita e despesa
+- Regra de unicidade por usuário, nome e tipo
+
+### 💰 Movimentações
+
+- Registro de receitas
+- Registro de despesas
+- Edição de transações
+- Exclusão de transações
+- Associação entre:
+  - usuário;
+  - conta;
+  - categoria;
+  - transação.
+- Formatação de valores monetários na interface
+
 ### 📊 Dashboard e saldos
 
 - Saldo atual por conta (saldo inicial + receitas − despesas), calculado no servidor
@@ -76,8 +98,8 @@ A aplicação foi construída com uma separação clara entre **frontend e backe
 ### 🧪 Testes
 
 ```bash
-cd backend  && npm test        # unitários + integração (requer PostgreSQL)
+cd backend  && npm test
 cd frontend && npm run lint && npm test && npm run build
 ```
 
-O workflow `.github/workflows/ci.yml` executa tudo isso a cada PR.
+O workflow `.github/workflows/ci.yml` executa essas verificações a cada Pull Request.
