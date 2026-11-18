@@ -8,16 +8,17 @@ const {
 } = require('../utils/userValidation');
 const {
   hashPassword,
-  comparePassword,
+  verifyLoginPassword,
   createAccessToken
 } = require('../utils/auth');
+const loginAttempts = require('../utils/loginAttempts');
 
 async function createUser(req, res, next) {
   try {
     const { name, email, password } = req.body;
 
     const validation = validateUserInput({ name, email });
-    const passwordValidation = validatePassword(password);
+    const passwordValidation = validatePassword(password, { email });
 
     if (!validation.isValid || !passwordValidation.isValid) {
       return res.status(400).json({
@@ -53,16 +54,30 @@ async function loginUser(req, res, next) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    const normalizedEmail = email.trim().toLowerCase().slice(0, 254);
+    const lock = loginAttempts.checkLock(normalizedEmail);
+
+    if (lock.locked) {
+      res.set('Retry-After', String(lock.retryAfterSeconds));
+      return res.status(429).json({
+        error: 'Muitas tentativas de login. Tente novamente mais tarde.'
+      });
+    }
+
     const user = await usersService.getUserByEmailForAuthentication(
-      email.trim().toLowerCase()
+      normalizedEmail
     );
-    const isPasswordValid = user?.passwordHash
-      ? await comparePassword(password, user.passwordHash)
-      : false;
+    const isPasswordValid = await verifyLoginPassword(
+      password,
+      user?.passwordHash
+    );
 
     if (!isPasswordValid) {
+      loginAttempts.recordFailure(normalizedEmail);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
+
+    loginAttempts.reset(normalizedEmail);
 
     return res.status(200).json({
       token: createAccessToken(user),
