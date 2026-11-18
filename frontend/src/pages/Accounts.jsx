@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
 import { formatCurrency, toAmountPayload } from '../utils/money';
 import {
@@ -151,18 +151,11 @@ function Accounts() {
   };
 
   return (
-    <AppLayout title="Contas" section="FINANÇAS">
+    <AppLayout
+      title="Contas"
+      description="Visualize e acompanhe o saldo das suas contas."
+    >
       <section className="dashboard">
-        <div className="dashboard-welcome">
-          <span>FINANÇAS</span>
-
-          <h2>Minhas contas</h2>
-
-          <p>
-            Visualize e acompanhe o saldo das suas contas.
-          </p>
-        </div>
-
         <section className="dashboard-section account-form-section">
           <div className="section-heading">
             <div>

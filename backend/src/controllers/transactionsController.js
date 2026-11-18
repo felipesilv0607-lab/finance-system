@@ -1,3 +1,4 @@
+const { isValidUUID } = require('../utils/uuid');
 const transactionsService = require('../services/transactionsService');
 const {
   TRANSACTION_TYPES,
@@ -80,6 +81,26 @@ function parseListQuery(query) {
       errors.type = 'Type must be either INCOME or EXPENSE';
     } else {
       filters.type = type;
+    }
+  }
+
+  for (const key of ['accountId', 'categoryId']) {
+    if (query[key] !== undefined) {
+      if (!isValidUUID(String(query[key]))) {
+        errors[key] = `${key} must be a valid UUID`;
+      } else {
+        filters[key] = String(query[key]);
+      }
+    }
+  }
+
+  if (query.q !== undefined) {
+    const q = String(query.q).trim();
+
+    if (q.length > 100) {
+      errors.q = 'q must have at most 100 characters';
+    } else if (q) {
+      filters.q = q;
     }
   }
 

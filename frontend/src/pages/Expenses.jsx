@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import useFocusNewEntry from '../hooks/useFocusNewEntry';
 import { formatCurrency, sumAmounts, toAmountPayload } from '../utils/money';
 import { apiDateToInputValue, formatDate, toDateInputValue } from '../utils/date';
 import {
@@ -17,6 +18,8 @@ import {
 
 
 function Expenses() {
+  useFocusNewEntry('description');
+
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -175,14 +178,10 @@ function Expenses() {
   }
 
   return (
-    <AppLayout title="Despesas" section="FINANÇAS">
-      <div className="page-container">
-        <div>
-          <h2>Despesas</h2>
-          <p>Gerencie seus gastos e saídas de dinheiro.</p>
-        </div>
-      </div>
-
+    <AppLayout
+      title="Despesas"
+      description="Gerencie seus gastos e saídas de dinheiro."
+    >
       {error && (
         <div className="alert alert-error">
           {error}
@@ -473,4 +472,4 @@ function Expenses() {
   );
 }
 
-export default Expenses;
+export default Expenses;

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node --test tests/money.unit.test.js tests/config.unit.test.js tests/robustness.integration.test.js tests/balance.integration.test.js tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js tests/security.integration.test.js",
+    "test": "node --test tests/money.unit.test.js tests/config.unit.test.js tests/robustness.integration.test.js tests/balance.integration.test.js tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js tests/security.integration.test.js tests/dashboard.integration.test.js",
     "postinstall": "prisma generate"
   },
   "keywords": [],
