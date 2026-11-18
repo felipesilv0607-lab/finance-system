@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import { formatCurrency, toAmountPayload } from '../utils/money';
 import {
   getAccounts,
   createAccount,
@@ -57,7 +58,7 @@ function Accounts() {
       const accountData = {
         name,
         type,
-        initialBalance: Number(initialBalance),
+        initialBalance: toAmountPayload(initialBalance),
       };
 
       if (editingAccount) {
@@ -137,12 +138,6 @@ function Accounts() {
       setDeletingAccountId(null);
     }
   }
-
-  const formatCurrency = (value) =>
-    Number(value || 0).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
 
   const formatAccountType = (accountType) => {
     const types = {
@@ -325,11 +320,15 @@ function Accounts() {
                 </div>
 
                 <div className="account-balance">
-                  <span>Saldo inicial</span>
+                  <span>Saldo atual</span>
 
                   <strong>
-                    {formatCurrency(account.initialBalance)}
+                    {formatCurrency(account.balance)}
                   </strong>
+
+                  <small>
+                    Saldo inicial: {formatCurrency(account.initialBalance)}
+                  </small>
                 </div>
 
                 <div className="account-card-actions">

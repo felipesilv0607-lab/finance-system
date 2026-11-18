@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node --test tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js",
+    "test": "node --test tests/money.unit.test.js tests/config.unit.test.js tests/robustness.integration.test.js tests/balance.integration.test.js tests/auth.integration.test.js tests/categories.integration.test.js tests/accounts.integration.test.js tests/transactions.integration.test.js",
     "postinstall": "prisma generate"
   },
   "keywords": [],
@@ -14,8 +14,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/adapter-pg": "^7.10.0",
-    "@prisma/client": "^7.9.1",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -24,9 +24,12 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
-    "prisma": "^7.9.1"
+    "prisma": "7.10.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

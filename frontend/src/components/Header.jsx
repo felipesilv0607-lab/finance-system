@@ -1,4 +1,16 @@
-﻿function Header({ title = 'Dashboard', section = 'VISÃO GERAL', onMenuClick }) {
+import { useNavigate } from 'react-router-dom';
+import { getCurrentUser, logout } from '../services/authService';
+
+function Header({ title = 'Dashboard', section = 'VISÃO GERAL', onMenuClick }) {
+  const navigate = useNavigate();
+  const user = getCurrentUser();
+  const displayName = user?.name || 'Usuário';
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <header className="header">
       <div className="header-left">
@@ -17,8 +29,13 @@
       </div>
 
       <div className="header-user">
-        <span className="header-user-name">Felipe</span>
-        <div className="header-avatar">F</div>
+        <span className="header-user-name">{displayName}</span>
+        <div className="header-avatar" aria-hidden="true">
+          {displayName.charAt(0).toUpperCase()}
+        </div>
+        <button type="button" className="header-logout" onClick={handleLogout}>
+          Sair
+        </button>
       </div>
     </header>
   );

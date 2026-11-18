@@ -73,11 +73,27 @@ async function getCategoryById(id, userId) {
 async function updateCategory(id, userId, { name, type }) {
   const existingCategory = await prisma.category.findFirst({
     where: { id, userId },
-    select: { id: true }
+    select: { id: true, type: true }
   });
 
   if (!existingCategory) {
     throw createNotFoundError();
+  }
+
+  // Mudar o tipo de uma categoria em uso deixaria receitas sob categoria de
+  // despesa (e vice-versa), quebrando a regra tipo da transação = tipo da categoria.
+  if (existingCategory.type !== type) {
+    const transactionCount = await prisma.transaction.count({
+      where: { categoryId: id }
+    });
+
+    if (transactionCount > 0) {
+      const error = new Error(
+        'Category type cannot be changed because it is used by transactions'
+      );
+      error.statusCode = 409;
+      throw error;
+    }
   }
 
   try {

@@ -1,6 +1,8 @@
 import { clearSession, getAuthorizationHeader } from './authService';
 import { API_URL } from '../config/api';
 
+const LOGIN_PATH = `${import.meta.env.BASE_URL}login`;
+
 
 async function request(path, options = {}) {
   const headers = {
@@ -19,8 +21,8 @@ async function request(path, options = {}) {
   if (response.status === 401) {
     clearSession();
 
-    if (window.location.pathname !== '/login') {
-      window.location.assign('/login');
+    if (window.location.pathname !== LOGIN_PATH) {
+      window.location.assign(LOGIN_PATH);
     }
 
     const error = new Error(

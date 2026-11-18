@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import { formatCurrency, sumAmounts, toAmountPayload } from '../utils/money';
+import { apiDateToInputValue, formatDate, toDateInputValue } from '../utils/date';
 import {
   createTransaction,
   deleteTransaction,
@@ -13,22 +15,6 @@ import {
   formatAmountOnBlur,
 } from '../utils/amount';
 
-function getToday() {
-  return new Date().toISOString().split('T')[0];
-}
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
-}
-
-function formatDate(date) {
-  const datePart = String(date).slice(0, 10);
-
-  return new Date(`${datePart}T00:00:00`).toLocaleDateString('pt-BR');
-}
 
 function Expenses() {
   const [transactions, setTransactions] = useState([]);
@@ -38,7 +24,7 @@ function Expenses() {
   const [form, setForm] = useState({
     description: '',
     amount: '',
-    date: getToday(),
+    date: toDateInputValue(),
     accountId: '',
     categoryId: ''
   });
@@ -50,42 +36,43 @@ function Expenses() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  async function loadData() {
-    try {
-      setLoading(true);
-      setError('');
+  const [reloadKey, setReloadKey] = useState(0);
 
-      const [transactionsData, accountsData, categoriesData] =
-        await Promise.all([
-          getTransactions('EXPENSE'),
-          getAccounts(),
-          getCategories()
-        ]);
-
-      setTransactions(transactionsData || []);
-      setAccounts(accountsData || []);
-
-      setCategories(
-        (categoriesData || []).filter(
-          (category) => category.type === 'EXPENSE'
-        )
-      );
-    } catch (err) {
-      setError(err.message || 'Não foi possível carregar as despesas.');
-    } finally {
-      setLoading(false);
-    }
+  function reload() {
+    setReloadKey((current) => current + 1);
   }
 
   useEffect(() => {
-    loadData();
-  }, []);
+    let active = true;
+
+    Promise.all([
+      getTransactions('EXPENSE'),
+      getAccounts(),
+      getCategories()
+    ])
+      .then(([transactionsData, accountsData, categoriesData]) => {
+        if (!active) return;
+
+        setTransactions(transactionsData || []);
+        setAccounts(accountsData || []);
+        setCategories(
+          (categoriesData || []).filter((category) => category.type === 'EXPENSE')
+        );
+      })
+      .catch((err) => {
+        if (active) setError(err.message || 'Não foi possível carregar as despesas.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
 
   const totalExpenses = useMemo(() => {
-    return transactions.reduce(
-      (total, transaction) => total + Number(transaction.amount),
-      0
-    );
+    return sumAmounts(transactions.map((transaction) => transaction.amount));
   }, [transactions]);
 
   function handleChange(event) {
@@ -101,7 +88,7 @@ function Expenses() {
     setForm({
       description: '',
       amount: '',
-      date: getToday(),
+      date: toDateInputValue(),
       accountId: '',
       categoryId: ''
     });
@@ -119,7 +106,7 @@ function Expenses() {
 
       const transactionData = {
         description: form.description,
-        amount: Number(form.amount),
+        amount: toAmountPayload(form.amount),
         type: 'EXPENSE',
         date: form.date,
         accountId: form.accountId,
@@ -135,7 +122,7 @@ function Expenses() {
       }
 
       resetForm();
-      await loadData();
+      reload();
     } catch (err) {
       setError(err.message || 'Não foi possível salvar a despesa.');
     } finally {
@@ -149,7 +136,7 @@ function Expenses() {
     setForm({
       description: transaction.description,
       amount: formatAmountInput(String(transaction.amount)),
-      date: transaction.date?.slice(0, 10),
+      date: apiDateToInputValue(transaction.date),
       accountId: transaction.accountId,
       categoryId: transaction.categoryId
     });
@@ -181,7 +168,7 @@ function Expenses() {
       }
 
       setSuccess('Despesa excluída com sucesso.');
-      await loadData();
+      reload();
     } catch (err) {
       setError(err.message || 'Não foi possível excluir a despesa.');
     }
