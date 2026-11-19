@@ -1,0 +1,342 @@
+/* Contas. Usa só tokens; sem dependência das regras legadas do App.css.
+   Primeira tela da modernização gradual: referência para as demais. */
+
+.acc {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* ---- Resumo (destaque do patrimônio) ---------------------------------- */
+
+.acc-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-8);
+  color: var(--text-inverse);
+  background: var(--bg-hero);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.acc-hero__main {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.acc-hero__label,
+.acc-hero__hint,
+.acc-hero__stat-label {
+  color: var(--color-primary-100);
+}
+
+.acc-hero__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+}
+
+.acc-hero__value {
+  font-size: var(--fs-3xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.acc-hero__value.is-negative {
+  color: var(--color-danger-200);
+}
+
+.acc-hero__hint {
+  font-size: var(--fs-xs);
+}
+
+.acc-hero__skeleton {
+  opacity: 0.35;
+}
+
+.acc-hero__stat {
+  display: grid;
+  justify-items: end;
+  padding: var(--space-3) var(--space-5);
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: var(--radius-md);
+}
+
+.acc-hero__stat-value {
+  font-size: var(--fs-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.acc-hero__stat-label {
+  font-size: var(--fs-xs);
+}
+
+/* ---- Formulário + lista ----------------------------------------------- */
+
+.acc-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.acc-form-card {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-6));
+  display: grid;
+  gap: var(--space-5);
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.acc-form-card.is-editing {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.acc-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.acc-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+}
+
+.acc-form__actions .ui-btn {
+  flex: 1 1 auto;
+}
+
+.acc-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-danger-800);
+  background: var(--color-danger-50);
+  border: 1px solid var(--color-danger-200);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+}
+
+.acc-alert .ui-icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.acc-alert p {
+  margin: 0;
+}
+
+.acc-list {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.acc-list__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.acc-list__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.acc-list__count {
+  min-width: 24px;
+  padding: 1px var(--space-2);
+  color: var(--color-primary-700);
+  background: var(--accent-soft);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+}
+
+.acc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ---- Cartão de conta -------------------------------------------------- */
+
+.acc-card {
+  position: relative;
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+.acc-card.is-editing {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.acc-card__top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.acc-card__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+}
+
+.acc-tone--primary {
+  color: var(--color-primary-700);
+  background: var(--color-primary-50);
+}
+
+.acc-tone--success {
+  color: var(--color-success-700);
+  background: var(--color-success-50);
+}
+
+.acc-tone--info {
+  color: var(--color-info-700);
+  background: var(--color-info-50);
+}
+
+.acc-tone--neutral {
+  color: var(--color-neutral-700);
+  background: var(--color-neutral-100);
+}
+
+.acc-card__identity {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.acc-card__name {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--fs-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acc-card__actions {
+  display: flex;
+  gap: var(--space-1);
+  margin: calc(var(--space-1) * -1) calc(var(--space-2) * -1) 0 0;
+}
+
+.acc-card__balance {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.acc-card__label {
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.acc-card__value {
+  font-size: var(--fs-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.acc-card__value.is-negative {
+  color: var(--text-expense);
+}
+
+.acc-card__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-default);
+  font-size: var(--fs-sm);
+}
+
+.acc-card__footer .num {
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+}
+
+.acc-card__editing {
+  position: absolute;
+  top: calc(var(--space-2) * -1 - 2px);
+  left: var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px var(--space-2);
+  color: var(--text-inverse);
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-semibold);
+}
+
+/* ---- Responsivo ------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .acc-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acc-form-card {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .acc-hero {
+    padding: var(--space-5);
+  }
+
+  .acc-hero__value {
+    font-size: var(--fs-2xl);
+  }
+}
+
+@media (max-width: 520px) {
+  .acc-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .acc-hero__stat {
+    justify-items: start;
+  }
+
+  .acc-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acc-form__actions .ui-btn {
+    flex-basis: 100%;
+  }
+}
