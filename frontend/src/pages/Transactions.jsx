@@ -157,7 +157,10 @@ function Transactions() {
         description: form.description.trim(),
         amount: toAmountPayload(form.amount),
         type: form.type,
-        date: new Date(`${form.date}T12:00:00`).toISOString(),
+        // Dia de calendário (YYYY-MM-DD), como em Receitas/Despesas: a API
+        // grava meia-noite UTC e utils/date.js lê em UTC. O meio-dia local
+        // caía no dia anterior em fusos acima de UTC+12.
+        date: form.date,
         accountId: form.accountId,
         categoryId: form.categoryId
       };
