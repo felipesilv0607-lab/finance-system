@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { EXPENSE_PAGE, INCOME_PAGE } from './movements.js';
+import { EXPENSE_PAGE, INCOME_PAGE, TRANSACTIONS_PAGE, movementVisual } from './movements.js';
 import { icons } from '../components/ui/icons.js';
 
 test('Receitas e Despesas usam os tipos aceitos pela API', () => {
@@ -28,4 +28,23 @@ test('ícones das telas de lançamentos existem', () => {
 test('tom visual corresponde ao tipo (verde = receita, vermelho = despesa)', () => {
   assert.equal(INCOME_PAGE.tone, 'income');
   assert.equal(EXPENSE_PAGE.tone, 'expense');
+});
+
+test('Transações lista os dois tipos e mostra a mensagem do campo da API', () => {
+  assert.equal(TRANSACTIONS_PAGE.type, null);
+  assert.equal(TRANSACTIONS_PAGE.fieldErrors, true);
+  assert.ok(icons[TRANSACTIONS_PAGE.emptyIcon], `faltando ícone ${TRANSACTIONS_PAGE.emptyIcon}`);
+
+  for (const key of ['title', 'description', 'noun', 'nounPlural', 'Noun', 'placeholder', 'formSubtitle', 'emptyDescription']) {
+    assert.ok(typeof TRANSACTIONS_PAGE[key] === 'string' && TRANSACTIONS_PAGE[key].trim(), `TRANSACTIONS_PAGE.${key} vazio`);
+  }
+});
+
+test('movementVisual escolhe tom, sinal e ícone pelo tipo do lançamento', () => {
+  assert.equal(movementVisual('INCOME').tone, 'income');
+  assert.equal(movementVisual('INCOME').sign, '+');
+  assert.equal(movementVisual('EXPENSE').tone, 'expense');
+  assert.equal(movementVisual('EXPENSE').sign, '−');
+  assert.ok(icons[movementVisual('INCOME').icon]);
+  assert.ok(icons[movementVisual('EXPENSE').icon]);
 });

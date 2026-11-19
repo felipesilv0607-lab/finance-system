@@ -1,4 +1,6 @@
-/* Dashboard (Etapa 3). Usa só tokens; sem dependência das regras legadas. */
+/* Dashboard. Usa só tokens; sem dependência das regras legadas. O resumo
+   (mov-hero) e as movimentações recentes (mov-history/MovementRow) reutilizam
+   o padrão de styles/movement.css; aqui ficam só os ajustes do Dashboard. */
 
 .dash {
   display: grid;
@@ -16,41 +18,47 @@
   align-self: end;
 }
 
-.dash-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-4);
+/* ---- Resumo: saldo + indicadores do período --------------------------- */
+
+.dash-hero .mov-hero__stats {
+  flex: 1 1 auto;
+  justify-content: flex-end;
 }
 
-.dash-kpi {
-  display: grid;
-  gap: var(--space-2);
-  border-top: 3px solid var(--accent);
+.dash-hero .dash-stat {
+  gap: 2px;
+  min-width: 150px;
 }
 
-.dash-kpi--income {
-  border-top-color: var(--color-success-700);
-}
-
-.dash-kpi--expense {
-  border-top-color: var(--color-danger-500);
-}
-
-.dash-kpi__label {
-  color: var(--text-secondary);
-  font-size: var(--fs-sm);
-  font-weight: var(--weight-medium);
-}
-
-.dash-kpi__value {
-  font-size: var(--fs-2xl);
-  line-height: var(--leading-tight);
+.dash-stat .mov-hero__stat-value {
+  font-size: var(--fs-xl);
   overflow-wrap: anywhere;
 }
 
-.dash-kpi__hint {
+/* Tons claros sobre o gradiente índigo (contraste >= 4,5:1). */
+.dash-stat--income .mov-hero__stat-value {
+  color: var(--color-success-200);
+}
+
+.dash-stat--expense .mov-hero__stat-value {
+  color: var(--color-danger-200);
+}
+
+.dash-stat__hint {
+  opacity: 0.85;
+}
+
+/* ---- Movimentações recentes ------------------------------------------- */
+
+.dash-recent {
+  align-self: start;
+  min-width: 0;
+}
+
+.dash-recent__subtitle {
+  margin: 2px 0 0;
   color: var(--text-secondary);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 
 .dash-grid {
@@ -248,73 +256,7 @@
   text-align: right;
 }
 
-/* ---- Movimentações recentes ------------------------------------------ */
-
-.dash-activity {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.dash-activity__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--border-default);
-}
-
-.dash-activity__item:last-child {
-  border-bottom: 0;
-}
-
-.dash-activity__main {
-  display: grid;
-  min-width: 0;
-}
-
-.dash-activity__title {
-  overflow: hidden;
-  font-weight: var(--weight-medium);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dash-activity__meta {
-  overflow: hidden;
-  color: var(--text-secondary);
-  font-size: var(--fs-xs);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dash-activity__amount {
-  flex: none;
-  font-weight: var(--weight-semibold);
-}
-
-.dash-activity__amount.is-income {
-  color: var(--text-income);
-}
-
-.dash-activity__amount.is-expense {
-  color: var(--text-expense);
-}
-
-.dash-activity-skeleton {
-  display: grid;
-  gap: var(--space-2);
-}
-
 /* ---- Responsivo ------------------------------------------------------- */
-
-@media (max-width: 1280px) {
-  .dash-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 @media (max-width: 1100px) {
   .dash-grid {
@@ -328,10 +270,20 @@
   }
 }
 
+@media (max-width: 720px) {
+  .dash-hero .mov-hero__stats {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 520px) {
-  .dash-filters,
-  .dash-kpis {
+  .dash-filters {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dash-hero .dash-stat {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 
   .dash-donut {

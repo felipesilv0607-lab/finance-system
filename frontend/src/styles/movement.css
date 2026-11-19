@@ -1,6 +1,8 @@
-/* Receitas e Despesas (components/MovementPage.jsx). Usa só tokens; sem
-   dependência das regras legadas do App.css. Segue o padrão das telas Contas
-   e Categorias: resumo, formulário fixo ao lado e histórico à direita. */
+/* Lançamentos: Receitas, Despesas e Transações (components/MovementPage.jsx),
+   e as linhas de movimentação (components/MovementRow.jsx), também usadas
+   pelo Dashboard. Usa só tokens; sem dependência das regras legadas do
+   App.css. Segue o padrão das telas Contas e Categorias: resumo, formulário
+   fixo ao lado e histórico à direita. */
 
 .mov {
   display: grid;
@@ -72,6 +74,17 @@
 
 .mov-hero__stat-label {
   font-size: var(--fs-xs);
+}
+
+/* Vários indicadores lado a lado (Transações e Dashboard). */
+.mov-hero__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.mov-hero__stats .mov-hero__stat {
+  min-width: 112px;
 }
 
 /* ---- Formulário + histórico ------------------------------------------- */
@@ -173,6 +186,18 @@
   font-size: var(--fs-lg);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
+}
+
+/* Filtro (Transações) e contagem, à direita do título do histórico. */
+.mov-history__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.mov-history__tools .ui-field {
+  min-width: 11rem;
 }
 
 .mov-history__count {
@@ -361,6 +386,16 @@
 
   .mov-hero__stat {
     justify-items: start;
+  }
+
+  .mov-hero__stats .mov-hero__stat {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .mov-history__tools,
+  .mov-history__tools .ui-field {
+    width: 100%;
   }
 
   .mov-form__row {
