@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import MovementRow from '../components/MovementRow';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Card, CardHeader } from '../components/ui/Card';
@@ -12,7 +13,6 @@ import CategoryDonut from '../components/charts/CategoryDonut';
 import { useDashboardOverview } from '../hooks/useDashboardOverview';
 import { getAccounts } from '../services/accountsService';
 import { getCategories } from '../services/categoriesService';
-import { formatDate } from '../utils/date';
 import { formatCurrency } from '../utils/money';
 import { DEFAULT_PERIOD, PERIOD_OPTIONS, periodLabel, periodRange } from '../utils/period';
 
@@ -42,17 +42,17 @@ function useFilterOptions() {
   return options;
 }
 
-function KpiCard({ label, value, hint, tone, loading }) {
+// Indicador do período dentro do resumo (Receitas, Despesas, Resultado).
+function HeroStat({ label, value, hint, tone, loading }) {
   return (
-    <Card as="article" className={`dash-kpi${tone ? ` dash-kpi--${tone}` : ''}`}>
-      <span className="dash-kpi__label">{label}</span>
-      {loading ? (
-        <Skeleton height={32} width="70%" />
-      ) : (
-        <strong className="dash-kpi__value num">{value}</strong>
-      )}
-      <small className="dash-kpi__hint">{hint}</small>
-    </Card>
+    <div className={`mov-hero__stat dash-stat${tone ? ` dash-stat--${tone}` : ''}`}>
+      <span className="mov-hero__stat-label">{label}</span>
+      <strong className="mov-hero__stat-value num">
+        {loading ? <span aria-hidden="true">—</span> : value}
+        {loading && <span className="sr-only">Carregando</span>}
+      </strong>
+      <span className="mov-hero__stat-label dash-stat__hint">{hint}</span>
+    </div>
   );
 }
 
@@ -71,28 +71,19 @@ function ChartCard({ title, subtitle, loading, empty, emptyText, children }) {
   );
 }
 
+// Movimentações recentes: a mesma linha do histórico de Receitas/Despesas,
+// sem ações (data no dia gravado, tom e sinal pelo tipo).
 function RecentActivity({ items }) {
   return (
-    <ul className="dash-activity">
-      {items.map((item) => {
-        const expense = item.type === 'EXPENSE';
-
-        return (
-          <li key={item.id} className="dash-activity__item">
-            <div className="dash-activity__main">
-              <span className="dash-activity__title">{item.description}</span>
-              <span className="dash-activity__meta">
-                {formatDate(item.date)} · {item.accountName} · {item.categoryName}
-              </span>
-            </div>
-            <span className={`dash-activity__amount num ${expense ? 'is-expense' : 'is-income'}`}>
-              <span className="sr-only">{expense ? 'Despesa: ' : 'Receita: '}</span>
-              {expense ? '− ' : '+ '}
-              {formatCurrency(item.amount)}
-            </span>
-          </li>
-        );
-      })}
+    <ul className="mov-rows">
+      {items.map((item) => (
+        <MovementRow
+          key={item.id}
+          transaction={item}
+          categoryName={item.categoryName}
+          accountName={item.accountName}
+        />
+      ))}
     </ul>
   );
 }
@@ -134,35 +125,37 @@ function Dashboard() {
       description="Acompanhe suas contas, receitas e despesas em um só lugar."
     >
       <div className="dash" aria-busy={loading}>
-        <form className="dash-filters" aria-label="Filtros do Dashboard" onSubmit={(event) => event.preventDefault()}>
-          <Select label="Período" value={period} onChange={(event) => changePeriod(event.target.value)}>
-            {PERIOD_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </Select>
+        <Card padding="sm" className="dash-filters-card">
+          <form className="dash-filters" aria-label="Filtros do Dashboard" onSubmit={(event) => event.preventDefault()}>
+            <Select label="Período" value={period} onChange={(event) => changePeriod(event.target.value)}>
+              {PERIOD_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </Select>
 
-          <Select label="Conta" value={accountId} onChange={(event) => setAccountId(event.target.value)}>
-            <option value="">Todas as contas</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>{account.name}</option>
-            ))}
-          </Select>
+            <Select label="Conta" value={accountId} onChange={(event) => setAccountId(event.target.value)}>
+              <option value="">Todas as contas</option>
+              {accounts.map((account) => (
+                <option key={account.id} value={account.id}>{account.name}</option>
+              ))}
+            </Select>
 
-          <Select label="Categoria" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-            <option value="">Todas as categorias</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name} ({category.type === 'INCOME' ? 'receita' : 'despesa'})
-              </option>
-            ))}
-          </Select>
+            <Select label="Categoria" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+              <option value="">Todas as categorias</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name} ({category.type === 'INCOME' ? 'receita' : 'despesa'})
+                </option>
+              ))}
+            </Select>
 
-          {hasFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="dash-filters__clear">
-              Limpar filtros
-            </Button>
-          )}
-        </form>
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="dash-filters__clear">
+                Limpar filtros
+              </Button>
+            )}
+          </form>
+        </Card>
 
         {error && (
           <div className="dash-error" role="alert">
@@ -186,23 +179,31 @@ function Dashboard() {
 
         {!error && !noActivityAtAll && (
           <>
-            <div className="dash-kpis">
-              <KpiCard
-                label="Saldo total"
-                value={formatCurrency(data?.totalBalance)}
-                hint={accountId ? 'Saldo da conta selecionada' : 'Saldo inicial + receitas − despesas, em todas as contas'}
-                loading={showKpiLoading}
-              />
-              <KpiCard label="Receitas" value={formatCurrency(data?.income)} hint={periodLabel(period)} tone="income" loading={showKpiLoading} />
-              <KpiCard label="Despesas" value={formatCurrency(expenseTotal)} hint={periodLabel(period)} tone="expense" loading={showKpiLoading} />
-              <KpiCard
-                label="Resultado"
-                value={formatCurrency(data?.net)}
-                hint="Receitas − despesas no período"
-                tone={data && Number(data.net) < 0 ? 'expense' : 'income'}
-                loading={showKpiLoading}
-              />
-            </div>
+            <section className="mov-hero dash-hero" aria-label="Resumo financeiro">
+              <div className="mov-hero__main">
+                <span className="mov-hero__label">Saldo total</span>
+                {showKpiLoading ? (
+                  <Skeleton height={36} width="12rem" className="mov-hero__skeleton" />
+                ) : (
+                  <strong className="mov-hero__value num">{formatCurrency(data?.totalBalance)}</strong>
+                )}
+                <span className="mov-hero__hint">
+                  {accountId ? 'Saldo da conta selecionada' : 'Saldo inicial + receitas − despesas, em todas as contas'}
+                </span>
+              </div>
+
+              <div className="mov-hero__stats">
+                <HeroStat label="Receitas" value={formatCurrency(data?.income)} hint={periodLabel(period)} tone="income" loading={showKpiLoading} />
+                <HeroStat label="Despesas" value={formatCurrency(expenseTotal)} hint={periodLabel(period)} tone="expense" loading={showKpiLoading} />
+                <HeroStat
+                  label="Resultado"
+                  value={formatCurrency(data?.net)}
+                  hint="Receitas − despesas no período"
+                  tone={data && Number(data.net) < 0 ? 'expense' : 'income'}
+                  loading={showKpiLoading}
+                />
+              </div>
+            </section>
 
             <div className="dash-grid">
               <ChartCard
@@ -253,20 +254,22 @@ function Dashboard() {
                 {data && <CategoryDonut items={data.expensesByCategory} total={data.expense} />}
               </ChartCard>
 
-              <Card className="dash-panel" aria-busy={loading}>
-                <CardHeader
-                  title="Movimentações recentes"
-                  subtitle="Receitas e despesas, da mais recente"
-                  actions={<Link to="/transactions" className="dash-link">Ver todas</Link>}
-                />
+              <Card padding="flush" className="mov-history dash-recent" aria-busy={loading} aria-labelledby="dash-recent-title">
+                <div className="mov-history__header">
+                  <div>
+                    <h2 id="dash-recent-title" className="mov-history__title">Movimentações recentes</h2>
+                    <p className="dash-recent__subtitle">Receitas e despesas, da mais recente</p>
+                  </div>
+                  <Link to="/transactions" className="dash-link">Ver todas</Link>
+                </div>
                 {loading ? (
-                  <div className="dash-activity-skeleton">
+                  <div className="mov-history__body mov-history__skeleton">
                     {[0, 1, 2, 3].map((item) => (
-                      <Skeleton key={item} height={44} radius="10px" />
+                      <Skeleton key={item} height={52} radius="10px" />
                     ))}
                   </div>
                 ) : data.recentTransactions.length === 0 ? (
-                  <p className="dash-panel__empty">Nenhuma movimentação para estes filtros.</p>
+                  <p className="mov-history__body dash-panel__empty">Nenhuma movimentação para estes filtros.</p>
                 ) : (
                   <RecentActivity items={data.recentTransactions} />
                 )}
