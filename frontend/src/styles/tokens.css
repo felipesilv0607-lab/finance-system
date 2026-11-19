@@ -1,0 +1,166 @@
+/* ==========================================================================
+   Design tokens — Finance System
+   Única fonte de verdade para cor, tipografia, espaçamento, raio, sombra e
+   movimento. Componentes e páginas devem usar apenas estas variáveis.
+   Os pares texto/fundo são validados por src/styles/tokens.test.js (WCAG AA).
+   ========================================================================== */
+
+:root {
+  /* ---- Cor: primária (índigo-azulado) ---------------------------------- */
+  --color-primary-50: #eef1ff;
+  --color-primary-100: #dfe4ff;
+  --color-primary-200: #c4ccff;
+  --color-primary-300: #9fabff;
+  --color-primary-400: #7a86fb;
+  --color-primary-500: #5a63f2;
+  --color-primary-600: #4547e0;
+  --color-primary-700: #3a38c2;
+  --color-primary-800: #302f9a;
+  --color-primary-900: #27276f;
+
+  /* ---- Cor: neutros ----------------------------------------------------- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #fafbfc;
+  --color-neutral-50: #f5f7fa;
+  --color-neutral-100: #eceff4;
+  --color-neutral-200: #dfe3ea;
+  --color-neutral-300: #c9cfd9;
+  --color-neutral-400: #858fa0;
+  --color-neutral-500: #5b6577;
+  --color-neutral-600: #4e5666;
+  --color-neutral-700: #373e4c;
+  --color-neutral-800: #232936;
+  --color-neutral-900: #151a24;
+  --color-neutral-950: #0d111a;
+
+  /* ---- Cor: semânticas (receita = verde, despesa = vermelho) ----------- */
+  --color-success-50: #ecfdf3;
+  --color-success-200: #abefc6;
+  --color-success-500: #12b76a;
+  --color-success-700: #0b7a43;
+
+  --color-danger-50: #fff1f0;
+  --color-danger-200: #fecdca;
+  --color-danger-500: #f04438;
+  --color-danger-700: #b42318;
+  --color-danger-800: #912018;
+
+  --color-warning-50: #fffaeb;
+  --color-warning-200: #fedf89;
+  --color-warning-500: #f79009;
+  --color-warning-700: #b54708;
+
+  --color-info-50: #eff8ff;
+  --color-info-200: #b2ddff;
+  --color-info-500: #2e90fa;
+  --color-info-700: #175cd3;
+
+  /* ---- Cor: papéis (use estes nos componentes) -------------------------- */
+  --bg-app: var(--color-neutral-50);
+  --bg-surface: var(--color-neutral-0);
+  --bg-subtle: var(--color-neutral-25);
+  --bg-muted: var(--color-neutral-100);
+  --bg-sidebar: var(--color-neutral-950);
+  --bg-sidebar-hover: #181d29;
+  --bg-sidebar-active: var(--color-primary-900);
+  --bg-hero: linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-700) 55%, var(--color-primary-600) 100%);
+
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-500);
+  --text-placeholder: #6a7385;
+  --text-inverse: var(--color-neutral-0);
+  --text-sidebar: var(--color-neutral-300);
+  --text-sidebar-muted: #8f99ab;
+  --text-link: var(--color-primary-700);
+  --text-income: var(--color-success-700);
+  --text-expense: var(--color-danger-700);
+
+  --border-default: var(--color-neutral-200);
+  --border-strong: var(--color-neutral-300);
+  --border-input: var(--color-neutral-400); /* >= 3:1 (WCAG 1.4.11) */
+  --border-focus: var(--color-primary-500);
+
+  --accent: var(--color-primary-600);
+  --accent-hover: var(--color-primary-700);
+  --accent-soft: var(--color-primary-50);
+
+  /* ---- Tipografia ------------------------------------------------------- */
+  --font-sans: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --fs-xs: 0.75rem; /* 12 */
+  --fs-sm: 0.8125rem; /* 13 */
+  --fs-base: 0.875rem; /* 14 */
+  --fs-md: 1rem; /* 16 */
+  --fs-lg: 1.125rem; /* 18 */
+  --fs-xl: 1.25rem; /* 20 */
+  --fs-2xl: 1.5rem; /* 24 */
+  --fs-3xl: 2rem; /* 32 */
+  --fs-4xl: 2.5rem; /* 40 */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+
+  /* ---- Espaçamento (base 4px) ------------------------------------------ */
+  --space-0: 0;
+  --space-1: 0.25rem; /* 4 */
+  --space-2: 0.5rem; /* 8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.25rem; /* 20 */
+  --space-6: 1.5rem; /* 24 */
+  --space-8: 2rem; /* 32 */
+  --space-10: 2.5rem; /* 40 */
+  --space-12: 3rem; /* 48 */
+  --space-16: 4rem; /* 64 */
+
+  /* ---- Raio ------------------------------------------------------------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* ---- Sombra (discretas) ---------------------------------------------- */
+  --shadow-xs: 0 1px 2px rgb(21 26 36 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(21 26 36 / 0.08), 0 1px 2px rgb(21 26 36 / 0.04);
+  --shadow-md: 0 6px 16px -4px rgb(21 26 36 / 0.1), 0 2px 6px -2px rgb(21 26 36 / 0.05);
+  --shadow-lg: 0 20px 40px -12px rgb(21 26 36 / 0.22);
+  --focus-ring: 0 0 0 3px rgb(90 99 242 / 0.35);
+
+  /* ---- Movimento -------------------------------------------------------- */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 260ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ---- Camadas ---------------------------------------------------------- */
+  --z-sticky: 20;
+  --z-sidebar: 100;
+  --z-overlay: 90;
+  --z-dialog: 200;
+  --z-toast: 300;
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --sidebar-width: 248px;
+  --header-height: 64px;
+  --content-max: 1240px;
+
+  /* ---- Compatibilidade com as telas ainda não migradas -------------------
+     Nomes antigos apontando para os novos tokens. Serão removidos quando
+     todas as telas usarem os tokens acima. */
+  --primary: var(--accent);
+  --primary-dark: var(--accent-hover);
+  --background: var(--bg-app);
+  --surface: var(--bg-surface);
+  --text: var(--text-primary);
+  --border: var(--border-default);
+  --success: var(--color-success-500);
+  --danger: var(--color-danger-500);
+  --warning: var(--color-warning-500);
+  --sidebar: var(--bg-sidebar);
+}

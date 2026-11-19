@@ -92,6 +92,6 @@ model Transaction {
   @@index([userId])
   @@index([accountId])
   @@index([categoryId])
-  @@index([date])
+  @@index([userId, date])
   @@map("transactions")
 }

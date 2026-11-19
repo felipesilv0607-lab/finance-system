@@ -1,6 +1,8 @@
+const prisma = require('../lib/prisma');
 const { verifyAccessToken } = require('../utils/auth');
+const { isValidUUID } = require('../utils/uuid');
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const authorization = req.headers.authorization;
 
   if (
@@ -20,8 +22,17 @@ function authenticate(req, res, next) {
     });
   }
 
+  let payload;
+
   try {
-    const payload = verifyAccessToken(token);
+    payload = verifyAccessToken(token);
+  } catch {
+    return res.status(401).json({
+      error: 'Invalid or expired authentication token'
+    });
+  }
+
+  try {
 
     if (
       !payload ||
@@ -34,15 +45,28 @@ function authenticate(req, res, next) {
       });
     }
 
+    // O token continua válido por até JWT_EXPIRES_IN, mas só vale enquanto o
+    // usuário existir (conta excluída não acessa nem cria dados).
+    const user = isValidUUID(payload.sub)
+      ? await prisma.user.findUnique({
+          where: { id: payload.sub },
+          select: { id: true }
+        })
+      : null;
+
+    if (!user) {
+      return res.status(401).json({
+        error: 'Invalid or expired authentication token'
+      });
+    }
+
     req.user = {
-      id: payload.sub
+      id: user.id
     };
 
     return next();
-  } catch {
-    return res.status(401).json({
-      error: 'Invalid or expired authentication token'
-    });
+  } catch (error) {
+    return next(error);
   }
 }
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import { formatCurrency, toAmountPayload } from '../utils/money';
+import { apiDateToInputValue, formatDate, toDateInputValue } from '../utils/date';
 import {
   createTransaction,
   getTransactions,
@@ -17,21 +19,10 @@ const initialForm = {
   description: '',
   amount: '',
   type: 'EXPENSE',
-  date: new Date().toISOString().split('T')[0],
+  date: toDateInputValue(),
   accountId: '',
   categoryId: ''
 };
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
-}
-
-function formatDate(value) {
-  return new Date(value).toLocaleDateString('pt-BR');
-}
 
 function getErrorMessage(error) {
   if (error?.details) {
@@ -60,31 +51,44 @@ function Transactions() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  async function loadData() {
-    try {
-      setLoading(true);
-      setError('');
+  const [reloadKey, setReloadKey] = useState(0);
 
-      const [transactionsData, accountsData, categoriesData] =
-        await Promise.all([
-          getTransactions(filterType || undefined),
-          getAccounts(),
-          getCategories()
-        ]);
-
-      setTransactions(transactionsData);
-      setAccounts(accountsData);
-      setCategories(categoriesData);
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setLoading(false);
-    }
+  function reload() {
+    setReloadKey((current) => current + 1);
   }
 
   useEffect(() => {
-    loadData();
-  }, [filterType]);
+    let active = true;
+
+    Promise.all([
+      getTransactions(filterType || undefined),
+      getAccounts(),
+      getCategories()
+    ])
+      .then(([transactionsData, accountsData, categoriesData]) => {
+        if (!active) return;
+
+        setTransactions(transactionsData);
+        setAccounts(accountsData);
+        setCategories(categoriesData);
+      })
+      .catch((requestError) => {
+        if (active) setError(getErrorMessage(requestError));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [filterType, reloadKey]);
+
+  function handleFilterChange(event) {
+    setLoading(true);
+    setError('');
+    setFilterType(event.target.value);
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -127,9 +131,7 @@ function Transactions() {
       description: transaction.description,
       amount: formatAmountInput(String(transaction.amount)),
       type: transaction.type,
-      date: new Date(transaction.date)
-        .toISOString()
-        .split('T')[0],
+      date: apiDateToInputValue(transaction.date),
       accountId: transaction.accountId,
       categoryId: transaction.categoryId
     });
@@ -153,7 +155,7 @@ function Transactions() {
 
       const payload = {
         description: form.description.trim(),
-        amount: Number(form.amount),
+        amount: toAmountPayload(form.amount),
         type: form.type,
         date: new Date(`${form.date}T12:00:00`).toISOString(),
         accountId: form.accountId,
@@ -169,7 +171,7 @@ function Transactions() {
       }
 
       resetForm();
-      await loadData();
+      reload();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     } finally {
@@ -198,7 +200,7 @@ function Transactions() {
         resetForm();
       }
 
-      await loadData();
+      reload();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     }
@@ -225,15 +227,11 @@ function Transactions() {
   }
 
   return (
-    <AppLayout title="Transações" section="FINANÇAS">
+    <AppLayout
+      title="Transações"
+      description="Gerencie suas receitas e despesas."
+    >
       <div className="page-container">
-
-        <div className="page-header">
-          <div>
-            <h1>Transações</h1>
-            <p>Gerencie suas receitas e despesas.</p>
-          </div>
-        </div>
 
         {error && (
           <div className="alert alert-error">
@@ -448,9 +446,7 @@ function Transactions() {
               <select
                 id="filterType"
                 value={filterType}
-                onChange={(event) =>
-                  setFilterType(event.target.value)
-                }
+                onChange={handleFilterChange}
               >
                 <option value="">Todas</option>
                 <option value="INCOME">

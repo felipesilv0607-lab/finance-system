@@ -1,3 +1,4 @@
+const { isValidUUID } = require('../utils/uuid');
 const transactionsService = require('../services/transactionsService');
 const {
   TRANSACTION_TYPES,
@@ -69,28 +70,83 @@ async function createTransaction(req, res, next) {
   }
 }
 
+function parseListQuery(query) {
+  const errors = {};
+  const filters = {};
+
+  if (query.type !== undefined) {
+    const type = String(query.type).trim().toUpperCase();
+
+    if (!TRANSACTION_TYPES.includes(type)) {
+      errors.type = 'Type must be either INCOME or EXPENSE';
+    } else {
+      filters.type = type;
+    }
+  }
+
+  for (const key of ['accountId', 'categoryId']) {
+    if (query[key] !== undefined) {
+      if (!isValidUUID(String(query[key]))) {
+        errors[key] = `${key} must be a valid UUID`;
+      } else {
+        filters[key] = String(query[key]);
+      }
+    }
+  }
+
+  if (query.q !== undefined) {
+    const q = String(query.q).trim();
+
+    if (q.length > 100) {
+      errors.q = 'q must have at most 100 characters';
+    } else if (q) {
+      filters.q = q;
+    }
+  }
+
+  for (const key of ['from', 'to']) {
+    if (query[key] !== undefined) {
+      const date = new Date(String(query[key]));
+
+      if (Number.isNaN(date.getTime())) {
+        errors[key] = `${key} must be a valid date`;
+      } else {
+        filters[key] = date;
+      }
+    }
+  }
+
+  for (const [key, max] of [['limit', 500], ['offset', Number.MAX_SAFE_INTEGER]]) {
+    if (query[key] !== undefined) {
+      const value = Number(query[key]);
+      const min = key === 'limit' ? 1 : 0;
+
+      if (!Number.isInteger(value) || value < min || value > max) {
+        errors[key] = `${key} must be an integer between ${min} and ${max}`;
+      } else {
+        filters[key] = value;
+      }
+    }
+  }
+
+  return { errors, filters };
+}
+
 async function getTransactions(req, res, next) {
   try {
-    const { type } = req.query;
+    const { errors, filters } = parseListQuery(req.query);
 
-    if (
-      type !== undefined &&
-      !TRANSACTION_TYPES.includes(
-        String(type).trim().toUpperCase()
-      )
-    ) {
+    if (Object.keys(errors).length > 0) {
       return res.status(400).json({
-        error: 'Type must be either INCOME or EXPENSE'
+        error: errors.type || 'Validation failed',
+        details: errors
       });
     }
 
-    const transactions =
-      await transactionsService.getTransactions(
-        req.user.id,
-        type === undefined
-          ? undefined
-          : String(type).trim().toUpperCase()
-      );
+    const transactions = await transactionsService.getTransactions(
+      req.user.id,
+      filters
+    );
 
     return res.status(200).json(transactions);
   } catch (error) {

@@ -55,14 +55,14 @@ function Login() {
           required
         />
 
-        {error && <p className="auth-error">{error}</p>}
+        {error && <p className="auth-error" role="alert">{error}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
 
         <p>
-          N�o possui conta? <Link to="/register">Cadastre-se</Link>
+          Não possui conta? <Link to="/register">Cadastre-se</Link>
         </p>
       </form>
     </main>

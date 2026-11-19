@@ -11,20 +11,31 @@ async function createUser({ name, email, passwordHash }) {
     throw error;
   }
 
-  return prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true
+  try {
+    return await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+  } catch (error) {
+    // Duas requisições simultâneas com o mesmo e-mail: a constraint única decide.
+    if (error?.code === 'P2002') {
+      const conflict = new Error('Email already registered');
+      conflict.statusCode = 409;
+      throw conflict;
     }
-  });
+
+    throw error;
+  }
 }
 
 async function getUserByEmailForAuthentication(email) {

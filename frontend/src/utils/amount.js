@@ -27,11 +27,13 @@ export function formatAmountOnBlur(value) {
     return '0.00';
   }
 
-  const number = Number(String(value).replace(',', '.'));
+  const normalized = String(value).replace(',', '.');
 
-  if (!Number.isFinite(number)) {
+  if (!/^\d+(\.\d{0,2})?$/.test(normalized)) {
     return '0.00';
   }
 
-  return number.toFixed(2);
+  const [integerPart, fraction = ''] = normalized.split('.');
+
+  return `${integerPart}.${fraction.padEnd(2, '0')}`;
 }

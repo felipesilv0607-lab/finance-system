@@ -36,6 +36,11 @@ A aplicação foi construída com uma separação clara entre **frontend e backe
 - Middleware de autenticação
 - Proteção das rotas privadas
 - Isolamento dos dados pelo usuário autenticado
+- O usuário do token é conferido a cada requisição (token de conta excluída recebe 401)
+- Login com custo de bcrypt uniforme, mesmo para e-mail inexistente
+- Limite de tentativas por IP (login e cadastro) e bloqueio por conta: 5 falhas em 15 min retornam 429 (em memória; zera ao reiniciar)
+- Política de senha para novos cadastros: 10 a 128 caracteres, sem senhas comuns, repetição ou o nome do e-mail
+- `JWT_EXPIRES_IN` aceito entre 1 minuto e 24 horas (padrão `1h`); o token fica em `localStorage` e não há revogação no servidor
 
 ### 💳 Contas
 
@@ -67,13 +72,26 @@ A aplicação foi construída com uma separação clara entre **frontend e backe
   - transação.
 - Formatação de valores monetários na interface
 
+### 📊 Dashboard e saldos
+
+- Saldo atual por conta (saldo inicial + receitas − despesas), calculado no servidor
+- `GET /api/dashboard/summary`: resumo do mês (contrato original, preservado)
+- `GET /api/dashboard/overview`: saldo total, receitas, despesas, evolução diária/mensal com saldo acumulado, despesas por categoria e movimentações recentes, com filtros `from`/`to`, `accountId` e `categoryId`
+- `GET /api/transactions`: filtros `accountId`, `categoryId` e `q` (descrição), com `limit`/`offset`
+- Gráficos em SVG próprio (sem bibliotecas), com estados de carregamento, erro e vazio
+- Valores monetários como string decimal exata, sem `float`
+
 ### 🧪 Testes
 
-O backend possui testes automatizados relacionados principalmente à autenticação e isolamento de dados.
+```bash
+cd backend  && npm test
+cd frontend && npm run lint && npm test && npm run build
+```
 
-A suíte atual foi executada com sucesso:
+O workflow `.github/workflows/ci.yml` executa essas verificações a cada Pull Request.
 
-```text
-4 testes
-4 aprovados
-0 falhas
+## 🚀 Publicação e rollback
+
+- **Ordem:** backend (Render) primeiro, depois o frontend (GitHub Pages). Atenção: o `deploy.yml` publica o Pages em **todo push na `develop`**, de forma independente do Render, sem esperar o CI nem o backend. Portanto o merge na `develop` não garante a ordem sozinho: **a publicação sequencial precisa ser preparada antes do merge** (por exemplo, publicar o backend a partir da `release/v1` primeiro, ou proteger o ambiente `github-pages` com aprovação manual).
+- **Migrations:** o Build Command do Render é `npm install && npx prisma generate` e **não aplica migrations**; elas são aplicadas manualmente no Supabase, depois de um `pg_dump` (procedimento, verificação e reversão em `backend/README.md`). A migration `20261113180000_transaction_indexes_and_amount_check` adiciona o índice `(userId, date)`, remove o índice antigo de `date` e cria um `CHECK amount > 0` como `NOT VALID` (não reprova linhas antigas). Ela é compatível com o código anterior, então pode ser aplicada antes ou depois do deploy do backend.
+- **Rollback:** o último estado de produção anterior à V1 é o commit `0577785` da `develop` (a tag `v0-producao` existe **apenas localmente** e ainda **não foi enviada ao GitHub**; até o push dela, use o hash do commit). Frontend: reexecutar o run do workflow desse commit ou reverter o merge na `develop`. Backend: rollback do deploy no painel do Render.

@@ -41,6 +41,12 @@ jobs:
           VITE_API_URL: https://finance-system-hf2u.onrender.com/api
         run: npm run build
 
+      # GitHub Pages não tem fallback de SPA: rotas como /finance-system/accounts
+      # (refresh ou redirecionamento de sessão expirada) retornariam 404.
+      # Servir o index.html como 404.html faz o React Router assumir a rota.
+      - name: SPA fallback (404.html)
+        run: cp dist/index.html dist/404.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

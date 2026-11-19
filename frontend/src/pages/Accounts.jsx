@@ -1,5 +1,6 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import { formatCurrency, toAmountPayload } from '../utils/money';
 import {
   getAccounts,
   createAccount,
@@ -57,7 +58,7 @@ function Accounts() {
       const accountData = {
         name,
         type,
-        initialBalance: Number(initialBalance),
+        initialBalance: toAmountPayload(initialBalance),
       };
 
       if (editingAccount) {
@@ -138,12 +139,6 @@ function Accounts() {
     }
   }
 
-  const formatCurrency = (value) =>
-    Number(value || 0).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-
   const formatAccountType = (accountType) => {
     const types = {
       BANK: 'Conta bancária',
@@ -156,18 +151,11 @@ function Accounts() {
   };
 
   return (
-    <AppLayout title="Contas" section="FINANÇAS">
+    <AppLayout
+      title="Contas"
+      description="Visualize e acompanhe o saldo das suas contas."
+    >
       <section className="dashboard">
-        <div className="dashboard-welcome">
-          <span>FINANÇAS</span>
-
-          <h2>Minhas contas</h2>
-
-          <p>
-            Visualize e acompanhe o saldo das suas contas.
-          </p>
-        </div>
-
         <section className="dashboard-section account-form-section">
           <div className="section-heading">
             <div>
@@ -325,11 +313,15 @@ function Accounts() {
                 </div>
 
                 <div className="account-balance">
-                  <span>Saldo inicial</span>
+                  <span>Saldo atual</span>
 
                   <strong>
-                    {formatCurrency(account.initialBalance)}
+                    {formatCurrency(account.balance)}
                   </strong>
+
+                  <small>
+                    Saldo inicial: {formatCurrency(account.initialBalance)}
+                  </small>
                 </div>
 
                 <div className="account-card-actions">

@@ -1,26 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const { getAllowedOrigins, getTrustProxy } = require('./config');
 const healthRoutes = require('./routes/health');
 const usersRoutes = require('./routes/users');
 const accountsRoutes = require('./routes/accounts');
 const categoriesRoutes = require('./routes/categories');
 const transactionsRoutes = require('./routes/transactions');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:5173'
-].filter(Boolean);
-
-app.use(
-  cors({
-    origin: allowedOrigins
-  })
-);
+app.set('trust proxy', getTrustProxy());
 
 app.use(helmet());
+app.use(cors({ origin: getAllowedOrigins() }));
 app.use(express.json({ limit: '100kb' }));
 
 app.use('/api/health', healthRoutes);
@@ -28,9 +22,16 @@ app.use('/api/transactions', transactionsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/categories', categoriesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
 
 app.use((err, req, res, next) => {
-  console.error(err);
+  if (res.headersSent) {
+    return next(err);
+  }
 
   const statusCode = Number.isInteger(err.statusCode)
     ? err.statusCode
@@ -38,14 +39,18 @@ app.use((err, req, res, next) => {
       ? 413
       : 500;
 
-  const isInternalError = statusCode >= 500;
+  // Só erros inesperados (5xx) vão para o log de erro; 4xx são esperados.
+  if (statusCode >= 500) {
+    console.error(err);
+  }
 
   res.status(statusCode).json({
-    error: isInternalError
-      ? 'Internal Server Error'
-      : statusCode === 413
-        ? 'Request body too large'
-        : err.message || 'Request failed'
+    error:
+      statusCode >= 500
+        ? 'Internal Server Error'
+        : statusCode === 413
+          ? 'Request body too large'
+          : err.message || 'Request failed'
   });
 });
 
