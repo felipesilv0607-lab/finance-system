@@ -1,97 +1,332 @@
-# 💰 Finance System
+# Sistema Financeiro
 
-> Uma aplicação Full Stack para gerenciamento financeiro, construída com foco em arquitetura, segurança, organização de código e evolução incremental.
+> Aplicação Full Stack para gerenciamento financeiro pessoal, desenvolvida com foco em arquitetura, segurança, organização de código, integridade dos dados e qualidade de software.
 
-O **Finance System** é um projeto de portfólio desenvolvido do zero para explorar, na prática, como diferentes camadas de uma aplicação web se conectam: interface, API, autenticação, autorização, banco de dados e regras de negócio.
+O **Sistema Financeiro** é um projeto de portfólio que demonstra, na prática, o desenvolvimento de uma aplicação web completa. A solução permite gerenciar contas, categorias, receitas e despesas, acompanhar saldos e visualizar informações financeiras por meio de um painel de controle.
 
-Mais do que criar uma interface para registrar receitas e despesas, o projeto foi evoluído para trabalhar com **isolamento de dados por usuário, autenticação segura, validações, testes e medidas básicas de proteção da API**.
+Mais do que uma aplicação de registro financeiro, o projeto foi desenvolvido para explorar conceitos importantes de engenharia de software, incluindo autenticação, autorização, isolamento de dados por usuário, validação de regras de negócio, testes automatizados e proteção de APIs.
 
----
+## Visão geral
 
-## 🎯 Visão do projeto
+- Gerenciamento de contas financeiras.
+- Organização de categorias de receitas e despesas.
+- Registro e acompanhamento de movimentações.
+- Cálculo de saldos por conta.
+- Dashboard com indicadores e gráficos.
+- Autenticação e proteção de rotas.
+- Isolamento de dados entre usuários.
 
-A ideia é construir uma aplicação financeira na qual o usuário possa centralizar suas movimentações e organizar sua vida financeira através de:
+## Tecnologias utilizadas
 
-- contas;
-- categorias;
-- receitas;
-- despesas;
-- transações;
-- autenticação de usuários.
+### Frontend
+- React
+- Vite
+- JavaScript
+- CSS
+- SVG para visualizações gráficas
+- React Router
 
-A aplicação foi construída com uma separação clara entre **frontend e backend**, permitindo que cada camada tenha responsabilidades próprias e possa evoluir de forma independente.
+### Backend
+- Node.js
+- Express
+- Prisma ORM
+- PostgreSQL
+- JSON Web Token (JWT)
+- bcrypt
 
----
+### Infraestrutura e ferramentas
+- Git e GitHub
+- GitHub Actions
+- GitHub Pages
+- Render
+- Supabase PostgreSQL
+- ESLint
+- Testes automatizados
 
-## ✨ O que já foi construído
+## Funcionalidades
 
-### 👤 Autenticação e usuários
+### Autenticação e gerenciamento de usuários
 
-- Cadastro de usuários
-- Login
-- Autenticação baseada em JWT
-- Expiração dos tokens
-- Validação de `issuer` e `audience`
-- Hash de senhas com bcrypt
-- Middleware de autenticação
-- Proteção das rotas privadas
-- Isolamento dos dados pelo usuário autenticado
-- O usuário do token é conferido a cada requisição (token de conta excluída recebe 401)
-- Login com custo de bcrypt uniforme, mesmo para e-mail inexistente
-- Limite de tentativas por IP (login e cadastro) e bloqueio por conta: 5 falhas em 15 min retornam 429 (em memória; zera ao reiniciar)
-- Política de senha para novos cadastros: 10 a 128 caracteres, sem senhas comuns, repetição ou o nome do e-mail
-- `JWT_EXPIRES_IN` aceito entre 1 minuto e 24 horas (padrão `1h`); o token fica em `localStorage` e não há revogação no servidor
+- Cadastro de usuários.
+- Login com e-mail e senha.
+- Autenticação baseada em JWT.
+- Validação de assinatura, emissor (`issuer`) e audiência (`audience`) dos tokens.
+- Hash de senhas com bcrypt.
+- Proteção de rotas privadas por middleware.
+- Verificação do usuário autenticado nas requisições.
+- Isolamento de dados por usuário.
+- Proteção contra acesso a recursos pertencentes a outros usuários.
+- Limitação de tentativas de login e cadastro.
+- Bloqueio temporário após tentativas consecutivas de autenticação inválidas.
+- Política de senha entre 10 e 128 caracteres, com validações contra senhas comuns e padrões inseguros.
 
-### 💳 Contas
+### Contas financeiras
 
-- Criação de contas
-- Edição de contas
-- Exclusão de contas
-- Definição do tipo da conta
-- Saldo inicial
-- Associação da conta ao usuário autenticado
+- Cadastro de contas.
+- Edição e exclusão de contas.
+- Definição do tipo de conta.
+- Configuração de saldo inicial.
+- Associação das contas ao usuário autenticado.
+- Cálculo do saldo atual considerando receitas e despesas.
 
-### 🏷️ Categorias
+### Categorias
 
-- Criação de categorias
-- Edição
-- Exclusão
-- Separação entre categorias de receita e despesa
-- Regra de unicidade por usuário, nome e tipo
+- Cadastro de categorias.
+- Edição e exclusão.
+- Separação entre categorias de receita e despesa.
+- Regras de unicidade por usuário, nome e tipo.
+- Associação das categorias às movimentações.
 
-### 💰 Movimentações
+### Movimentações financeiras
 
-- Registro de receitas
-- Registro de despesas
-- Edição de transações
-- Exclusão de transações
-- Associação entre:
-  - usuário;
-  - conta;
-  - categoria;
-  - transação.
-- Formatação de valores monetários na interface
+- Registro de receitas.
+- Registro de despesas.
+- Edição de movimentações.
+- Exclusão de movimentações.
+- Associação entre usuário, conta e categoria.
+- Validação dos valores monetários.
+- Filtros por conta, categoria e descrição.
+- Paginação dos resultados.
 
-### 📊 Dashboard e saldos
+### Dashboard e indicadores financeiros
 
-- Saldo atual por conta (saldo inicial + receitas − despesas), calculado no servidor
-- `GET /api/dashboard/summary`: resumo do mês (contrato original, preservado)
-- `GET /api/dashboard/overview`: saldo total, receitas, despesas, evolução diária/mensal com saldo acumulado, despesas por categoria e movimentações recentes, com filtros `from`/`to`, `accountId` e `categoryId`
-- `GET /api/transactions`: filtros `accountId`, `categoryId` e `q` (descrição), com `limit`/`offset`
-- Gráficos em SVG próprio (sem bibliotecas), com estados de carregamento, erro e vazio
-- Valores monetários como string decimal exata, sem `float`
+- Saldo atual por conta.
+- Saldo total consolidado.
+- Resumo mensal de receitas e despesas.
+- Evolução diária e mensal do saldo.
+- Despesas agrupadas por categoria.
+- Histórico de movimentações recentes.
+- Filtros por período, conta e categoria.
+- Gráficos desenvolvidos com SVG, sem dependência de bibliotecas externas de visualização.
 
-### 🧪 Testes
+## API e regras de negócio
+
+A API disponibiliza endpoints para gerenciamento das funcionalidades do sistema.
+
+### Dashboard
+
+`GET /api/dashboard/summary`
+
+Retorna o resumo financeiro mensal, preservando o contrato original da aplicação.
+
+`GET /api/dashboard/overview`
+
+Retorna informações consolidadas, incluindo:
+
+- Saldo total.
+- Receitas.
+- Despesas.
+- Evolução diária e mensal.
+- Saldo acumulado.
+- Despesas por categoria.
+- Movimentações recentes.
+
+Filtros disponíveis:
+
+- `from`
+- `to`
+- `accountId`
+- `categoryId`
+
+### Transações
+
+`GET /api/transactions`
+
+Permite consultar movimentações com os seguintes filtros:
+
+- `accountId`
+- `categoryId`
+- `q` — pesquisa por descrição.
+- `limit`
+- `offset`
+
+### Integridade financeira
+
+- Cálculos de saldo realizados no servidor.
+- Valores monetários tratados como strings decimais exatas, evitando imprecisões de ponto flutuante.
+- Validação de valores positivos.
+- Verificação de propriedade dos recursos pelo usuário autenticado.
+- Operações relacionadas protegidas por transações no banco de dados.
+
+## Segurança
+
+A aplicação possui mecanismos de proteção implementados no frontend e backend.
+
+### Controles implementados
+
+- Autenticação JWT com algoritmo e parâmetros de validação definidos.
+- Hash de senhas com bcrypt.
+- Proteção de rotas privadas.
+- Verificação de propriedade dos registros.
+- Validação de dados recebidos pela API.
+- Proteção contra atribuição indevida de propriedades (`mass assignment`).
+- Consultas parametrizadas.
+- Limitação de tentativas de autenticação.
+- Confirmação da senha atual para alteração de e-mail e exclusão da própria conta.
+- Validação rigorosa de datas.
+- Limitação do tamanho do corpo das requisições.
+- Configurações de segurança HTTP e CORS.
+
+### Pontos de atenção documentados
+
+Algumas limitações permanecem registradas:
+
+- JWT armazenado em `localStorage`, com exposição potencial em caso de XSS.
+- Logout não invalida imediatamente o token no servidor.
+- Ausência de verificação de e-mail.
+- Ausência de recuperação de senha.
+- Limites de tentativas armazenados em memória, sem compartilhamento entre múltiplas instâncias.
+- Duas vulnerabilidades moderadas em uma dependência utilizada exclusivamente no desenvolvimento (`nodemon`).
+
+Esses pontos foram identificados e documentados durante a revisão final de segurança.
+
+## Testes e qualidade
+
+O projeto possui testes automatizados para validar regras de negócio, autenticação, segurança e comportamento das funcionalidades.
+
+### Executar os testes
+
+Backend:
 
 ```bash
-cd backend  && npm test
-cd frontend && npm run lint && npm test && npm run build
+cd backend
+npm test
 ```
 
-O workflow `.github/workflows/ci.yml` executa essas verificações a cada Pull Request.
+Frontend:
 
-## 🚀 Publicação e rollback
+```bash
+cd frontend
+npm run lint
+npm test
+npm run build
+```
 
-- **Ordem:** backend (Render) primeiro, depois o frontend (GitHub Pages). Atenção: o `deploy.yml` publica o Pages em **todo push na `develop`**, de forma independente do Render, sem esperar o CI nem o backend. Portanto o merge na `develop` não garante a ordem sozinho: **a publicação sequencial precisa ser preparada antes do merge** (por exemplo, publicar o backend a partir da `release/v1` primeiro, ou proteger o ambiente `github-pages` com aprovação manual).
-- **Migrations:** o Build Command do Render é `npm install && npx prisma generate` e **não aplica migrations**; elas são aplicadas manualmente no Supabase, depois de um `pg_dump` (procedimento, verificação e reversão em `backend/README.md`). A migration `20261113180000_transaction_indexes_and_amount_check` adiciona o índice `(userId, date)`, remove o índice antigo de `date` e cria um `CHECK amount > 0` como `NOT VALID` (não reprova linhas antigas). Ela é compatível com o código anterior, então pode ser aplicada antes ou depois do deploy do backend.
-- **Rollback:** o último estado de produção anterior à V1 é o commit `0577785` da `develop` (a tag `v0-producao` existe **apenas localmente** e ainda **não foi enviada ao GitHub**; até o push dela, use o hash do commit). Frontend: reexecutar o run do workflow desse commit ou reverter o merge na `develop`. Backend: rollback do deploy no painel do Render.
+### Resultados da revisão final
+
+| Verificação | Resultado |
+|---|---:|
+| Testes do frontend | 99/99 |
+| Testes do backend | 32/32 |
+| Testes de segurança caixa-preta | 20/20 |
+| Testes de autenticação no navegador | 9/9 |
+| Testes de regressão no navegador | 67/67 |
+| ESLint | Aprovado |
+| Build | Aprovado |
+
+A revisão final também incluiu uma bateria de 80 execuções de diagnóstico de segurança, sem reprodução de uma falha intermitente anteriormente observada no ambiente Windows.
+
+### Integração contínua
+
+O workflow `.github/workflows/ci.yml` executa verificações automatizadas nas Pull Requests, incluindo testes e validações do projeto.
+
+## Arquitetura
+
+A aplicação utiliza uma arquitetura separada em frontend e backend.
+
+```text
+finance-system/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── config/
+│   │   ├── pages/
+│   │   └── styles/
+│   └── package.json
+│
+├── backend/
+│   ├── prisma/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── utils/
+│   └── package.json
+│
+└── .github/
+    └── workflows/
+```
+
+*Estrutura ilustrativa das principais áreas do projeto.*
+
+## Publicação
+
+O projeto está publicado utilizando os seguintes serviços:
+
+- **Frontend:** GitHub Pages.
+- **Backend:** Render.
+- **Banco de dados:** PostgreSQL hospedado no Supabase.
+
+### Acessar a aplicação
+
+- [Aplicação online](https://felipesilv0607-lab.github.io/finance-system/)
+- [Repositório no GitHub](https://github.com/felipesilv0607-lab/finance-system)
+
+## Deploy, migrações e rollback
+
+### Ordem de publicação
+
+A publicação do backend e do frontend exige atenção à ordem de implantação.
+
+O workflow `deploy.yml` publica o GitHub Pages em todo push na branch `develop`, independentemente da conclusão do deploy do backend no Render.
+
+Portanto, a integração de uma Pull Request na `develop` não garante, por si só, a ordem de publicação entre os serviços.
+
+A publicação sequencial deve ser preparada antes do merge, garantindo que o backend esteja atualizado antes da disponibilização de alterações dependentes no frontend.
+
+### Migrações do banco de dados
+
+O Build Command do Render utiliza:
+
+```bash
+npm install && npx prisma generate
+```
+
+Esse comando não aplica migrações automaticamente.
+
+As migrações são aplicadas manualmente no Supabase, seguindo o procedimento documentado em `backend/README.md`, incluindo:
+
+- Backup com `pg_dump`.
+- Verificação da migração.
+- Aplicação controlada.
+- Procedimento de reversão.
+
+A migração `20261113180000_transaction_indexes_and_amount_check` adiciona o índice `(userId, date)`, remove o índice anterior de `date` e cria uma restrição `CHECK amount > 0` como `NOT VALID`, preservando a compatibilidade com registros antigos.
+
+### Rollback
+
+O último estado de produção anterior à V1 corresponde ao commit `0577785` da branch `develop`.
+
+A tag `v0-producao` existe localmente, mas não foi enviada ao GitHub no encerramento do projeto. Até que seja publicada, o hash do commit deve ser utilizado como referência.
+
+- **Frontend:** reexecutar o workflow correspondente ao commit anterior ou reverter o merge na `develop`.
+- **Backend:** utilizar o rollback do deploy pelo painel do Render.
+- **Banco de dados:** seguir o procedimento de reversão documentado em `backend/README.md`.
+
+## Evolução do projeto
+
+O desenvolvimento foi realizado de maneira incremental, com foco na preservação das funcionalidades existentes e na melhoria contínua da qualidade do código.
+
+As etapas finais incluíram:
+
+- Modernização das interfaces.
+- Reorganização de componentes e regras de negócio.
+- Correções de validação e integridade de dados.
+- Revisão de autenticação e autorização.
+- Testes automatizados e regressão de navegador.
+- Auditoria de segurança.
+- Correções publicadas por meio das PRs #9 e #10.
+
+## Objetivo do projeto
+
+O Sistema Financeiro foi desenvolvido como experiência prática de engenharia de software Full Stack, aplicando conceitos de desenvolvimento frontend, construção de APIs, persistência de dados, segurança, testes e implantação em produção.
+
+O projeto representa a aplicação prática de conhecimentos de desenvolvimento web e organização de sistemas, desde a modelagem dos dados até a publicação de uma aplicação funcional.
+
+---
+
+**Desenvolvido por Felipe Luz Cunha**
+
+[GitHub](https://github.com/felipesilv0607-lab) · [LinkedIn](https://www.linkedin.com/in/felipeluz-dev)
