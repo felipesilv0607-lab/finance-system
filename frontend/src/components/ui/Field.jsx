@@ -69,6 +69,7 @@ export function Input({ id, label, hint, error, required, prefix, className, dis
           className={cx('ui-field__input', className)}
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={describedBy}
+          required={required}
           aria-required={required || undefined}
           disabled={disabled}
           {...rest}
@@ -99,6 +100,7 @@ export function Select({ id, label, hint, error, required, className, disabled, 
           className={cx('ui-field__input', className)}
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={describedBy}
+          required={required}
           aria-required={required || undefined}
           disabled={disabled}
           {...rest}
