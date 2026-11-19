@@ -50,6 +50,17 @@ async function getUserByEmailForAuthentication(email) {
   });
 }
 
+async function getUserForPasswordCheck(id) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true
+    }
+  });
+}
+
 async function getUsers() {
   return prisma.user.findMany({
     select: {
@@ -129,6 +140,7 @@ async function getUserById(id) {
 module.exports = {
   createUser,
   getUserByEmailForAuthentication,
+  getUserForPasswordCheck,
   getUsers,
   getUserById,
   updateUser,

@@ -13,6 +13,51 @@ const {
 } = require('../utils/auth');
 const loginAttempts = require('../utils/loginAttempts');
 
+// Alterar o e-mail ou excluir a conta exige a senha atual: só o token (que
+// pode vazar) não basta. As falhas contam no mesmo bloqueio por conta do login,
+// para esta rota não virar um caminho de força bruta sem limite.
+// Retorna true se confirmou; senão já respondeu.
+async function confirmCurrentPassword(userId, currentPassword, res) {
+  if (typeof currentPassword !== 'string' || currentPassword.length === 0) {
+    res.status(400).json({
+      error: 'Validation failed',
+      details: { currentPassword: 'Current password is required' }
+    });
+    return false;
+  }
+
+  const user = await usersService.getUserForPasswordCheck(userId);
+
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return false;
+  }
+
+  const lock = loginAttempts.checkLock(user.email);
+
+  if (lock.locked) {
+    res.set('Retry-After', String(lock.retryAfterSeconds));
+    res.status(429).json({
+      error: 'Muitas tentativas. Tente novamente mais tarde.'
+    });
+    return false;
+  }
+
+  const isPasswordValid = await verifyLoginPassword(
+    currentPassword.slice(0, 128),
+    user.passwordHash
+  );
+
+  if (!isPasswordValid) {
+    loginAttempts.recordFailure(user.email);
+    res.status(403).json({ error: 'Current password is incorrect' });
+    return false;
+  }
+
+  loginAttempts.reset(user.email);
+  return true;
+}
+
 async function createUser(req, res, next) {
   try {
     const { name, email, password } = req.body;
@@ -144,7 +189,7 @@ async function updateUser(req, res, next) {
       });
     }
 
-    const { name, email } = req.body;
+    const { name, email, currentPassword } = req.body;
 
     const validation = validateUserInput({ name, email });
 
@@ -154,6 +199,8 @@ async function updateUser(req, res, next) {
         details: validation.errors
       });
     }
+
+    if (!(await confirmCurrentPassword(id, currentPassword, res))) return;
 
     const normalizedData = normalizeUserInput({
       name,
@@ -184,6 +231,8 @@ async function deleteUser(req, res, next) {
         error: 'Invalid user ID'
       });
     }
+
+    if (!(await confirmCurrentPassword(id, req.body.currentPassword, res))) return;
 
     await usersService.deleteUser(id);
 

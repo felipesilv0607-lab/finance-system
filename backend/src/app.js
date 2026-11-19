@@ -16,6 +16,13 @@ app.set('trust proxy', getTrustProxy());
 app.use(helmet());
 app.use(cors({ origin: getAllowedOrigins() }));
 app.use(express.json({ limit: '100kb' }));
+// No Express 5, req.body fica undefined sem corpo JSON (sem Content-Type ou
+// text/plain). Um objeto vazio faz essas requisições caírem na validação (400)
+// em vez de quebrar a desestruturação nos controllers (500).
+app.use((req, res, next) => {
+  req.body ??= {};
+  next();
+});
 
 app.use('/api/health', healthRoutes);
 app.use('/api/transactions', transactionsRoutes);

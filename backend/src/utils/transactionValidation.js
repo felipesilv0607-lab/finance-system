@@ -37,6 +37,13 @@ function validateTransactionInput({
     errors.date = 'Date is required';
   } else if (Number.isNaN(new Date(date).getTime())) {
     errors.date = 'Date must be valid';
+  } else if (
+    // O JS "rola" dias inexistentes (2026-02-31 vira 03/03); recusa no formato AAAA-MM-DD.
+    typeof date === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(date.trim()) &&
+    new Date(date.trim()).toISOString().slice(0, 10) !== date.trim()
+  ) {
+    errors.date = 'Date must be valid';
   }
 
   if (!isValidUUID(accountId)) {

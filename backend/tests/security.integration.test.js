@@ -156,3 +156,88 @@ test('cadastro aplica a política de senha', async () => {
     assert.equal((await register(PASSWORD)).status, 201);
   });
 });
+
+test('alterar ou excluir o próprio usuário exige a senha atual (com bloqueio de tentativas)', async () => {
+  loginAttempts.clearAll();
+  const passwordHash = await bcrypt.hash(PASSWORD, 4);
+  const email = `self-${crypto.randomUUID()}@test.com`;
+  const user = await prisma.user.create({ data: { name: 'Self', email, passwordHash } });
+  const token = signToken(user.id);
+  const newEmail = `novo-${crypto.randomUUID()}@test.com`;
+
+  try {
+    await withServer(async (call) => {
+      const update = (body) => call(`/users/${user.id}`, { method: 'PUT', token, body: { name: 'Self', email: newEmail, ...body } });
+      const remove = (body) => call(`/users/${user.id}`, { method: 'DELETE', token, body });
+
+      const noPassword = await update({});
+      assert.equal(noPassword.status, 400);
+      assert.ok(noPassword.body.details.currentPassword);
+      assert.equal((await update({ currentPassword: 'senha-errada-123' })).status, 403);
+      assert.equal((await remove({ currentPassword: 'senha-errada-123' })).status, 403);
+      assert.equal((await remove(undefined)).status, 400);
+      assert.equal((await prisma.user.findUnique({ where: { id: user.id } })).email, email);
+
+      const updated = await update({ currentPassword: PASSWORD });
+      assert.equal(updated.status, 200);
+      assert.equal(updated.body.email, newEmail);
+
+      // Falhas contam no bloqueio por conta: após 5, nem a senha certa passa.
+      for (let i = 0; i < 5; i++) {
+        assert.equal((await remove({ currentPassword: `errada-${i}-xyz` })).status, 403);
+      }
+      const locked = await remove({ currentPassword: PASSWORD });
+      assert.equal(locked.status, 429);
+      assert.ok(locked.headers.get('retry-after'));
+
+      loginAttempts.clearAll();
+      assert.equal((await remove({ currentPassword: PASSWORD })).status, 204);
+      assert.equal(await prisma.user.findUnique({ where: { id: user.id } }), null);
+    });
+  } finally {
+    loginAttempts.clearAll();
+    await prisma.user.deleteMany({ where: { id: user.id } });
+  }
+});
+
+test('requisição sem corpo JSON recebe 400, não 500', async () => {
+  const user = await prisma.user.create({
+    data: { name: 'Raw', email: `raw-${crypto.randomUUID()}@test.com`, passwordHash: 'x' }
+  });
+  const server = app.listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  const base = `http://127.0.0.1:${server.address().port}/api`;
+
+  try {
+    // Os testes anteriores esgotam o limite de login por IP (em memória, mesmo processo).
+    const { loginRateLimit } = require('../src/middlewares/rateLimitMiddleware');
+    for (const ip of ['127.0.0.1', '::ffff:127.0.0.1', '::1']) await loginRateLimit.resetKey(ip);
+
+    const login = await fetch(`${base}/users/login`, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: 'x' });
+    assert.equal(login.status, 400);
+
+    const auth = { Authorization: `Bearer ${signToken(user.id)}` };
+    for (const path of ['/accounts', '/categories', '/transactions']) {
+      const created = await fetch(`${base}${path}`, { method: 'POST', headers: auth });
+      assert.equal(created.status, 400, path);
+    }
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await prisma.user.delete({ where: { id: user.id } });
+  }
+});
+
+test('data de lançamento: dia inexistente é recusado, formatos válidos continuam aceitos', () => {
+  const { validateTransactionInput } = require('../src/utils/transactionValidation');
+  const dateError = (date) => validateTransactionInput({
+    description: 'Teste', amount: '1.00', type: 'EXPENSE', date,
+    accountId: crypto.randomUUID(), categoryId: crypto.randomUUID()
+  }).errors.date;
+
+  for (const invalid of ['2026-02-31', '2026-02-29', '2026-04-31', '2026-13-01', '2026-00-10', 'invalid-date', '']) {
+    assert.ok(dateError(invalid), invalid);
+  }
+  for (const valid of ['2026-02-28', '2024-02-29', '2026-12-31', '2026-11-10T15:00:00.000Z']) {
+    assert.equal(dateError(valid), undefined, valid);
+  }
+});
