@@ -1,0 +1,373 @@
+/* Receitas e Despesas (components/MovementPage.jsx). Usa só tokens; sem
+   dependência das regras legadas do App.css. Segue o padrão das telas Contas
+   e Categorias: resumo, formulário fixo ao lado e histórico à direita. */
+
+.mov {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* ---- Resumo ----------------------------------------------------------- */
+
+.mov-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-8);
+  color: var(--text-inverse);
+  background: var(--bg-hero);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.mov-hero__main {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.mov-hero__label,
+.mov-hero__hint,
+.mov-hero__stat-label {
+  color: var(--color-primary-100);
+}
+
+.mov-hero__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+}
+
+.mov-hero__value {
+  font-size: var(--fs-3xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.mov-hero__hint {
+  font-size: var(--fs-xs);
+}
+
+.mov-hero__skeleton {
+  opacity: 0.35;
+}
+
+.mov-hero__stat {
+  display: grid;
+  justify-items: end;
+  padding: var(--space-3) var(--space-5);
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: var(--radius-md);
+}
+
+.mov-hero__stat-value {
+  font-size: var(--fs-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.mov-hero__stat-label {
+  font-size: var(--fs-xs);
+}
+
+/* ---- Formulário + histórico ------------------------------------------- */
+
+.mov-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.mov-form-card {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-6));
+  display: grid;
+  gap: var(--space-5);
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.mov-form-card.is-editing {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.mov-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.mov-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* .ui-field é um grid de coluna implícita "auto": a largura mínima do <input>
+   nativo (+ prefixo "R$") alargava a coluna além da metade do card e o Valor
+   invadia a Data. Limita a coluna à largura disponível. */
+.mov-form__row .ui-field {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mov-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+}
+
+.mov-form__actions .ui-btn {
+  flex: 1 1 auto;
+}
+
+.mov-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-danger-800);
+  background: var(--color-danger-50);
+  border: 1px solid var(--color-danger-200);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+}
+
+.mov-alert .ui-icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.mov-alert p {
+  flex: 1 1 12rem;
+  margin: 0;
+}
+
+.mov-alert__action {
+  margin-left: auto;
+}
+
+/* ---- Histórico -------------------------------------------------------- */
+
+.mov-history {
+  min-width: 0;
+}
+
+.mov-history__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.mov-history__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.mov-history__count {
+  padding: 1px var(--space-2);
+  color: var(--color-primary-700);
+  background: var(--accent-soft);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.mov-history__body {
+  padding: var(--space-5) var(--space-6);
+}
+
+.mov-history__skeleton {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mov-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mov-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--border-default);
+  border-left: 3px solid transparent;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.mov-row:last-child {
+  border-bottom: 0;
+}
+
+.mov-row:hover {
+  background: var(--bg-subtle);
+}
+
+.mov-row.is-editing {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.mov-row__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+}
+
+.mov-row--income .mov-row__icon {
+  color: var(--color-success-700);
+  background: var(--color-success-50);
+}
+
+.mov-row--expense .mov-row__icon {
+  color: var(--color-danger-700);
+  background: var(--color-danger-50);
+}
+
+.mov-row__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mov-row__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-weight: var(--weight-medium);
+}
+
+.mov-row__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mov-row__editing {
+  flex: none;
+  padding: 0 var(--space-2);
+  color: var(--text-inverse);
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.mov-row__meta {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mov-row__amount {
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.mov-row--income .mov-row__amount {
+  color: var(--text-income);
+}
+
+.mov-row--expense .mov-row__amount {
+  color: var(--text-expense);
+}
+
+.mov-row__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* ---- Responsivo ------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .mov-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mov-form-card {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .mov-hero {
+    padding: var(--space-5);
+  }
+
+  .mov-hero__value {
+    font-size: var(--fs-2xl);
+  }
+
+  .mov-history__header,
+  .mov-history__body {
+    padding: var(--space-4);
+  }
+
+  /* Linha em duas faixas: dados em cima, valor e ações embaixo. */
+  .mov-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'icon main main'
+      'icon amount actions';
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  }
+
+  .mov-row__icon {
+    grid-area: icon;
+    align-self: start;
+  }
+
+  .mov-row__main {
+    grid-area: main;
+  }
+
+  .mov-row__amount {
+    grid-area: amount;
+  }
+
+  .mov-row__actions {
+    grid-area: actions;
+  }
+}
+
+@media (max-width: 520px) {
+  .mov-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .mov-hero__stat {
+    justify-items: start;
+  }
+
+  .mov-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mov-form__actions .ui-btn {
+    flex-basis: 100%;
+  }
+}
