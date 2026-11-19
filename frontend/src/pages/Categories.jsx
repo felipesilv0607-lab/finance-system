@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '../components/AppLayout';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import { Card, CardHeader } from '../components/ui/Card';
+import { ConfirmDialog } from '../components/ui/Dialog';
+import EmptyState from '../components/ui/EmptyState';
+import { Input, Select } from '../components/ui/Field';
+import Icon from '../components/ui/Icon';
+import IconButton from '../components/ui/IconButton';
+import Skeleton from '../components/ui/Skeleton';
+import { useToast } from '../components/toast-context';
 import {
   createCategory,
   deleteCategory,
@@ -7,20 +17,82 @@ import {
   updateCategory,
 } from '../services/categoriesService';
 
-const typeLabels = {
-  INCOME: 'Receita',
-  EXPENSE: 'Despesa',
+// Rótulo, ícone e tom visual de cada tipo de categoria.
+const CATEGORY_TYPES = {
+  EXPENSE: { label: 'Despesa', group: 'Despesas', icon: 'trending-down', tone: 'danger' },
+  INCOME: { label: 'Receita', group: 'Receitas', icon: 'trending-up', tone: 'success' },
 };
 
+// Ordem dos grupos na lista (a mesma do seletor de tipo).
+const TYPE_ORDER = ['EXPENSE', 'INCOME'];
+
+const NAME_FIELD_ID = 'category-name';
+
+function prefersReducedMotion() {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
+function focusNameField() {
+  const field = document.getElementById(NAME_FIELD_ID);
+
+  // 'auto' = rolagem instantânea (nenhum CSS define scroll-behavior: smooth).
+  field?.scrollIntoView({
+    block: 'center',
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+  });
+  field?.focus({ preventScroll: true });
+}
+
+function CategoryRow({ category, editing, busy, deleting, onEdit, onDelete }) {
+  const type = CATEGORY_TYPES[category.type];
+
+  return (
+    <li className={`cat-row${editing ? ' is-editing' : ''}`}>
+      <span className={`cat-row__icon cat-tone--${type?.tone ?? 'neutral'}`} aria-hidden="true">
+        <Icon name={type?.icon ?? 'tag'} size={18} />
+      </span>
+
+      <div className="cat-row__identity">
+        <span className="cat-row__name">{category.name}</span>
+        {editing && (
+          <Badge tone="primary" icon="edit">Em edição</Badge>
+        )}
+      </div>
+
+      <div className="cat-row__actions">
+        <IconButton
+          icon="edit"
+          label={`Editar categoria ${category.name}`}
+          size="sm"
+          onClick={() => onEdit(category)}
+          disabled={busy || deleting}
+        />
+        <IconButton
+          icon="trash"
+          label={`Excluir categoria ${category.name}`}
+          size="sm"
+          tone="danger"
+          onClick={() => onDelete(category)}
+          disabled={busy || deleting}
+        />
+      </div>
+    </li>
+  );
+}
+
 function Categories() {
+  const toast = useToast();
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [error, setError] = useState('');
   const [name, setName] = useState('');
   const [type, setType] = useState('EXPENSE');
   const [saving, setSaving] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   useEffect(() => {
     async function loadCategories() {
@@ -28,7 +100,7 @@ function Categories() {
         setCategories(await getCategories());
       } catch (requestError) {
         console.error(requestError);
-        setError('Não foi possível carregar as categorias.');
+        setLoadError('Não foi possível carregar as categorias.');
       } finally {
         setLoading(false);
       }
@@ -54,9 +126,18 @@ function Categories() {
         setCategories((currentCategories) => currentCategories.map((category) => (
           category.id === updatedCategory.id ? updatedCategory : category
         )));
+
+        toast.success('Categoria atualizada', `"${updatedCategory.name}" foi salva.`);
       } else {
         const newCategory = await createCategory({ name, type });
         setCategories((currentCategories) => [...currentCategories, newCategory]);
+
+        toast.success(
+          'Categoria criada',
+          loadError
+            ? `"${newCategory.name}" foi salva. Recarregue a página para ver a lista completa.`
+            : `"${newCategory.name}" já aparece na lista.`
+        );
       }
 
       resetForm();
@@ -73,10 +154,13 @@ function Categories() {
     setName(category.name);
     setType(category.type);
     setError('');
+    focusNameField();
   }
 
-  async function handleDelete(category) {
-    if (!window.confirm(`Excluir a categoria "${category.name}"?`)) return;
+  async function handleConfirmDelete() {
+    const category = categoryToDelete;
+
+    if (!category) return;
 
     setDeletingId(category.id);
     setError('');
@@ -90,12 +174,31 @@ function Categories() {
       if (editingCategory?.id === category.id) {
         resetForm();
       }
+
+      toast.success('Categoria excluída', `"${category.name}" foi removida.`);
     } catch (requestError) {
       console.error(requestError);
-      setError(requestError.message);
+      // Ex.: categoria usada por movimentações (409). O aviso aparece junto da
+      // ação, e não no formulário, que pode estar sendo usado para outra categoria.
+      toast.error('Não foi possível excluir a categoria', requestError.message);
     } finally {
       setDeletingId(null);
+      setCategoryToDelete(null);
     }
+  }
+
+  // Sem a listagem completa, contagens e grupos seriam parciais (ou zero):
+  // o resumo e a lista ficam indisponíveis até um carregamento bem-sucedido.
+  const listUnavailable = Boolean(loadError);
+  const groups = TYPE_ORDER.map((groupType) => ({
+    type: groupType,
+    ...CATEGORY_TYPES[groupType],
+    items: categories.filter((category) => category.type === groupType),
+  }));
+  const totalCount = categories.length;
+
+  function summaryValue(value) {
+    return loading || listUnavailable ? '—' : value;
   }
 
   return (
@@ -103,20 +206,54 @@ function Categories() {
       title="Categorias"
       description="Organize receitas e despesas para os próximos lançamentos."
     >
-      <section className="dashboard">
-        <section className="dashboard-section category-form-section">
-          <div className="section-heading">
-            <div>
-              <span>{editingCategory ? 'EDIÇÃO' : 'CADASTRO'}</span>
-              <h3>{editingCategory ? 'Editar categoria' : 'Nova categoria'}</h3>
-            </div>
+      <div className="cat" aria-busy={loading}>
+        <section className="cat-hero" aria-label="Resumo das categorias">
+          <div className="cat-hero__main">
+            <span className="cat-hero__label">Categorias cadastradas</span>
+            <strong className="cat-hero__value num">
+              {loading || listUnavailable ? (
+                <>
+                  <span aria-hidden="true">—</span>
+                  <span className="sr-only">{loading ? 'Carregando' : 'Indisponível'}</span>
+                </>
+              ) : (
+                totalCount
+              )}
+            </strong>
+            <span className="cat-hero__hint">
+              {listUnavailable
+                ? 'Indisponível: não foi possível carregar as categorias'
+                : 'Usadas para classificar receitas e despesas'}
+            </span>
           </div>
 
-          <form className="category-form" onSubmit={handleSubmit}>
-            <div className="form-field">
-              <label htmlFor="category-name">Nome da categoria</label>
-              <input
-                id="category-name"
+          <div className="cat-hero__stats">
+            {groups.map((group) => (
+              <div className="cat-hero__stat" key={group.type}>
+                <span className="cat-hero__stat-value num">{summaryValue(group.items.length)}</span>
+                <span className="cat-hero__stat-label">{group.group}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="cat-layout">
+          <Card className={`cat-form-card${editingCategory ? ' is-editing' : ''}`}>
+            <CardHeader
+              eyebrow={editingCategory ? 'Edição' : 'Cadastro'}
+              title={editingCategory ? 'Editar categoria' : 'Nova categoria'}
+              subtitle={
+                editingCategory
+                  ? `Alterando "${editingCategory.name}".`
+                  : 'Crie categorias para organizar seus lançamentos.'
+              }
+              headingLevel={2}
+            />
+
+            <form className="cat-form" onSubmit={handleSubmit}>
+              <Input
+                id={NAME_FIELD_ID}
+                label="Nome da categoria"
                 type="text"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
@@ -125,81 +262,140 @@ function Categories() {
                 maxLength="100"
                 required
               />
-            </div>
 
-            <div className="form-field">
-              <label htmlFor="category-type">Tipo</label>
-              <select
+              <Select
                 id="category-type"
+                label="Tipo"
                 value={type}
                 onChange={(event) => setType(event.target.value)}
                 required
               >
                 <option value="EXPENSE">Despesa</option>
                 <option value="INCOME">Receita</option>
-              </select>
-            </div>
+              </Select>
 
-            <div className="category-form-actions">
-              <button className="account-submit-button" type="submit" disabled={saving}>
-                {saving ? 'Salvando...' : editingCategory ? 'Salvar alterações' : 'Criar categoria'}
-              </button>
+              {error && (
+                <div className="cat-alert" role="alert">
+                  <Icon name="alert-circle" size={18} />
+                  <p>{error}</p>
+                </div>
+              )}
 
-              {editingCategory && (
-                <button className="category-cancel-button" type="button" onClick={resetForm}>
-                  Cancelar
-                </button>
+              <div className="cat-form__actions">
+                <Button
+                  type="submit"
+                  icon={editingCategory ? 'check' : 'plus'}
+                  loading={saving}
+                >
+                  {saving ? 'Salvando...' : editingCategory ? 'Salvar alterações' : 'Criar categoria'}
+                </Button>
+
+                {editingCategory && (
+                  <Button variant="secondary" onClick={resetForm} disabled={saving}>
+                    Cancelar
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Card>
+
+          <section className="cat-list" aria-labelledby="cat-list-title">
+            <div className="cat-list__header">
+              <h2 id="cat-list-title" className="cat-list__title">Suas categorias</h2>
+              {!loading && !listUnavailable && totalCount > 0 && (
+                <span className="cat-list__count">{totalCount}</span>
               )}
             </div>
-          </form>
-        </section>
 
-        {loading && <div className="dashboard-section"><p>Carregando categorias...</p></div>}
-        {error && <div className="dashboard-section"><p>{error}</p></div>}
-
-        {!loading && (
-          <section className="dashboard-section">
-            <div className="section-heading">
-              <div>
-                <span>LISTA</span>
-                <h3>Categorias cadastradas</h3>
+            {loadError && (
+              <div className="cat-alert" role="alert">
+                <Icon name="alert-circle" size={18} />
+                <p>{loadError}</p>
               </div>
-            </div>
+            )}
 
-            {categories.length === 0 ? (
-              <div className="empty-state">
-                <h4>Nenhuma categoria cadastrada</h4>
-                <p>Crie uma categoria para organizar seus lançamentos.</p>
+            {loading && (
+              <div className="cat-groups">
+                {[0, 1].map((item) => (
+                  <Skeleton key={item} height={168} radius="16px" />
+                ))}
               </div>
-            ) : (
-              <div className="categories-list">
-                {categories.map((category) => (
-                  <article className="category-row" key={category.id}>
-                    <div>
-                      <span className={`category-type category-type-${category.type.toLowerCase()}`}>
-                        {typeLabels[category.type]}
+            )}
+
+            {!loading && !loadError && totalCount === 0 && (
+              <Card>
+                <EmptyState
+                  icon="tag"
+                  title="Nenhuma categoria cadastrada"
+                  description="Crie uma categoria para organizar seus lançamentos."
+                  action={
+                    <Button variant="secondary" icon="plus" onClick={focusNameField}>
+                      Criar categoria
+                    </Button>
+                  }
+                />
+              </Card>
+            )}
+
+            {!loading && !listUnavailable && totalCount > 0 && (
+              <div className="cat-groups">
+                {groups.map((group) => (
+                  <Card
+                    key={group.type}
+                    padding="flush"
+                    className="cat-group"
+                    aria-labelledby={`cat-group-${group.type}`}
+                  >
+                    <div className="cat-group__header">
+                      <span className={`cat-group__icon cat-tone--${group.tone}`} aria-hidden="true">
+                        <Icon name={group.icon} size={16} />
                       </span>
-                      <h4>{category.name}</h4>
+                      <h3 id={`cat-group-${group.type}`} className="cat-group__title">
+                        {group.group}
+                      </h3>
+                      <Badge tone={group.tone}>{group.items.length}</Badge>
                     </div>
 
-                    <div className="category-actions">
-                      <button type="button" onClick={() => handleEdit(category)}>Editar</button>
-                      <button
-                        className="category-delete-button"
-                        type="button"
-                        onClick={() => handleDelete(category)}
-                        disabled={deletingId === category.id}
-                      >
-                        {deletingId === category.id ? 'Excluindo...' : 'Excluir'}
-                      </button>
-                    </div>
-                  </article>
+                    {group.items.length === 0 ? (
+                      <p className="cat-group__empty">
+                        Nenhuma categoria de {group.label.toLowerCase()} cadastrada.
+                      </p>
+                    ) : (
+                      <ul className="cat-rows">
+                        {group.items.map((category) => (
+                          <CategoryRow
+                            key={category.id}
+                            category={category}
+                            editing={editingCategory?.id === category.id}
+                            busy={saving}
+                            deleting={deletingId === category.id}
+                            onEdit={handleEdit}
+                            onDelete={setCategoryToDelete}
+                          />
+                        ))}
+                      </ul>
+                    )}
+                  </Card>
                 ))}
               </div>
             )}
           </section>
-        )}
-      </section>
+        </div>
+      </div>
+
+      <ConfirmDialog
+        open={categoryToDelete !== null}
+        title="Excluir categoria?"
+        description={
+          categoryToDelete
+            ? `Tem certeza que deseja excluir a categoria "${categoryToDelete.name}"? Esta ação não pode ser desfeita.`
+            : undefined
+        }
+        confirmLabel="Excluir categoria"
+        loading={deletingId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setCategoryToDelete(null)}
+      />
     </AppLayout>
   );
 }

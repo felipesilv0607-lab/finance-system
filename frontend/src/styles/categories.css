@@ -1,0 +1,333 @@
+/* Categorias. Usa só tokens; sem dependência das regras legadas do App.css.
+   Segue o padrão da tela Contas (accounts.css): resumo, formulário fixo ao
+   lado e lista à direita. */
+
+.cat {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* ---- Resumo ----------------------------------------------------------- */
+
+.cat-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-8);
+  color: var(--text-inverse);
+  background: var(--bg-hero);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.cat-hero__main {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.cat-hero__label,
+.cat-hero__hint,
+.cat-hero__stat-label {
+  color: var(--color-primary-100);
+}
+
+.cat-hero__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+}
+
+.cat-hero__value {
+  font-size: var(--fs-3xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.cat-hero__hint {
+  font-size: var(--fs-xs);
+}
+
+.cat-hero__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.cat-hero__stat {
+  display: grid;
+  justify-items: end;
+  min-width: 112px;
+  padding: var(--space-3) var(--space-5);
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: var(--radius-md);
+}
+
+.cat-hero__stat-value {
+  font-size: var(--fs-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.cat-hero__stat-label {
+  font-size: var(--fs-xs);
+}
+
+/* ---- Formulário + lista ----------------------------------------------- */
+
+.cat-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.cat-form-card {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-6));
+  display: grid;
+  gap: var(--space-5);
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.cat-form-card.is-editing {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.cat-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.cat-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+}
+
+.cat-form__actions .ui-btn {
+  flex: 1 1 auto;
+}
+
+.cat-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-danger-800);
+  background: var(--color-danger-50);
+  border: 1px solid var(--color-danger-200);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+}
+
+.cat-alert .ui-icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.cat-alert p {
+  margin: 0;
+}
+
+.cat-list {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.cat-list__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cat-list__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.cat-list__count {
+  min-width: 24px;
+  padding: 1px var(--space-2);
+  color: var(--color-primary-700);
+  background: var(--accent-soft);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+}
+
+/* ---- Grupos por tipo -------------------------------------------------- */
+
+.cat-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.cat-group__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-subtle);
+}
+
+.cat-group__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+}
+
+.cat-group__title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.cat-group__empty {
+  margin: 0;
+  padding: var(--space-5);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.cat-tone--danger {
+  color: var(--color-danger-700);
+  background: var(--color-danger-50);
+}
+
+.cat-tone--success {
+  color: var(--color-success-700);
+  background: var(--color-success-50);
+}
+
+.cat-tone--neutral {
+  color: var(--color-neutral-700);
+  background: var(--color-neutral-100);
+}
+
+/* ---- Linhas ----------------------------------------------------------- */
+
+.cat-rows {
+  display: grid;
+  margin: 0;
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+
+.cat-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5);
+  border-left: 3px solid transparent;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.cat-row:hover {
+  background: var(--bg-subtle);
+}
+
+.cat-row.is-editing {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.cat-row__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.cat-row__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.cat-row__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-row__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* ---- Responsivo ------------------------------------------------------- */
+
+@media (max-width: 1280px) {
+  .cat-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .cat-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cat-form-card {
+    position: static;
+  }
+
+  .cat-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .cat-hero {
+    padding: var(--space-5);
+  }
+
+  .cat-hero__value {
+    font-size: var(--fs-2xl);
+  }
+
+  .cat-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .cat-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .cat-hero__stat {
+    flex: 1;
+    justify-items: start;
+    min-width: 0;
+  }
+
+  .cat-form__actions .ui-btn {
+    flex-basis: 100%;
+  }
+}
